@@ -2,7 +2,7 @@
 
 ## Description
 
-CognifyLMS is a web-based platform Learning Management System that allows instructors to create and manage courses, modules, and lessons, while enabling students to enroll, track their progress, and interact with course content.
+CognifyLMS is a web-based Learning Management System that allows instructors to create and manage courses, modules, and lessons, while enabling students to enroll, track their progress, and interact with course content.
 
 The app includes a custom session-based authentication system, ensuring secure login and user management. It provides an intuitive user interface for both instructors and students, with role-based access control.
 
