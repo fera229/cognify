@@ -7,11 +7,11 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
+    "migrate": "ley --require tsx/cjs",
     "start": "next start"
   },
   "dependencies": {
     "dotenv-safe": "^9.1.0",
-    "ley tsx": "link:@upleveled/ley tsx",
     "next": "15.0.0-canary.165",
     "postgres": "^3.4.4",
     "react": "19.0.0-rc-e740d4b1-20240919",
