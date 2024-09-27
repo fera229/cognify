@@ -7,7 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 interface SidebarItemProps {
   icon: LucideIcon;
   label: string;
-  // href should be string, but it's a quick fix for now
+  // ❌ href should be string, but it's a quick fix for now
   href: any;
 }
 
