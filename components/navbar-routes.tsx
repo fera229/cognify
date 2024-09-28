@@ -5,11 +5,6 @@ import { Button } from './ui/button';
 import { LogOut } from 'lucide-react';
 import Link from 'next/link';
 
-// interface NavbarRoutesProps {
-//   // ❌ href should be string, but it's a quick fix for now
-//   href: any;
-// }
-
 export const NavbarRoutes = () => {
   const pathname = usePathname();
 

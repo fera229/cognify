@@ -1,5 +1,9 @@
-import React from 'react';
+import LoginFormCard from './login-form';
 
 export default function LoginPage() {
-  return <div>Login Page</div>;
+  return (
+    <div className="flex h-screen w-full items-center justify-center px-4">
+      <LoginFormCard />
+    </div>
+  );
 }
