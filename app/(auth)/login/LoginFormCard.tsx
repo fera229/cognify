@@ -62,7 +62,6 @@ export default function LoginFormCard(searchParams: SearchParams) {
       toast.success('Login successful!');
 
       const params = await searchParams;
-      console.log('searchParams: ', searchParams);
 
       router.push(getSafeReturnToPath(params.returnTo) || '/');
     } catch (error) {
