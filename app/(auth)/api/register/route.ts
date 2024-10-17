@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createUserInsecure, getUserInsecure, User } from '@/database/users';
 import bcrypt from 'bcrypt';
-import { registerSchema } from '@/migrations/00000-users';
+import { registerSchema } from '@/util/validation';
 import { cookies } from 'next/headers';
 import { createSessionInsecure } from '@/database/session';
 import crypto from 'node:crypto';

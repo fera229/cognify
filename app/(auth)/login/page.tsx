@@ -2,10 +2,7 @@ import LoginFormCard from './LoginFormCard';
 import { redirect } from 'next/navigation';
 import { getSafeReturnToPath } from '@/util/validation';
 import { checkIfSessionIsValid } from '@/database/users';
-
-export type SearchParams = {
-  returnTo: string | string[];
-};
+import { SearchParams } from '@/util/types';
 
 export default async function LoginPage(searchParams: SearchParams) {
   const sessionValid = await checkIfSessionIsValid();

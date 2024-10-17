@@ -1,7 +1,10 @@
+'use server';
 import { cache } from 'react';
 import { sql } from './connect';
 import { cookies } from 'next/headers';
 import { getValidSession } from '@/database/session';
+import toast from 'react-hot-toast';
+
 export type User = {
   id: number;
   username: string;
@@ -29,17 +32,27 @@ export const getUserInsecure = cache(async (username: string) => {
   return user;
 });
 
-export const getUserRole = cache(async (userId: number) => {
-  const [user] = await sql<Pick<User, 'role'>[]>`
-    SELECT
-      users.role
-    FROM
-      users
-    WHERE
-      users.id = ${userId}
-  `;
-  return user;
-});
+export const IsRoleInstructor = cache(
+  async (userId: number): Promise<Boolean> => {
+    const [user] = await sql<Pick<User, 'role'>[]>`
+      SELECT
+        users.role
+      FROM
+        users
+      WHERE
+        users.id = ${userId}
+    `;
+    if (!user) {
+      console.error('User not found');
+    }
+
+    toast.error('User not found');
+    if (user?.role === 'Instructor') {
+      return true;
+    }
+    return false;
+  },
+);
 
 export const getUserWithPasswordHashInsecure = cache(async (email: string) => {
   const [user] = await sql<UserWithPasswordHash[]>`
@@ -94,7 +107,6 @@ export const createUserInsecure = cache(
 export const checkIfSessionIsValid = async (): Promise<boolean> => {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('sessionToken');
-  // 2. Check if the sessionToken cookie is still valid
 
   const validSession =
     sessionToken && (await getValidSession(sessionToken.value));
@@ -104,3 +116,58 @@ export const checkIfSessionIsValid = async (): Promise<boolean> => {
   }
   return false;
 };
+
+interface CookieStore {
+  get: (name: string) => { value: string } | undefined;
+}
+
+// export async function getUserFromSession(
+//   cookieStore: CookieStore,
+// ): Promise<User | null> {
+//   const sessionToken = cookieStore?.get('sessionToken')?.value;
+
+//   if (!sessionToken) {
+//     return null;
+//   }
+
+//   const [user] = await sql<User[]>`
+//     SELECT
+//       users.*
+//     FROM
+//       users
+//       JOIN sessions ON sessions.user_id = users.id
+//     WHERE
+//       sessions.token = ${sessionToken}
+//       AND sessions.expiry_timestamp > now()
+//   `;
+
+//   return user || null;
+// }
+
+export const getUserFromSession = cache(async (): Promise<User | null> => {
+  try {
+    const cookieStore = await cookies();
+    // console.log('cookieStore:', cookieStore);
+    const sessionToken = cookieStore.get('sessionToken')?.value;
+
+    if (!sessionToken) {
+      return null;
+    }
+
+    const [user] = await sql<User[]>`
+      SELECT
+        users.*
+      FROM
+        users
+        JOIN sessions ON sessions.user_id = users.id
+      WHERE
+        sessions.token = ${sessionToken}
+        AND sessions.expiry_timestamp > now()
+    `;
+
+    return user || null;
+  } catch (error) {
+    console.error('Error in getUserFromSession:', error);
+    return null;
+  }
+});

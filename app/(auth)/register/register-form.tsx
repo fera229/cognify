@@ -16,13 +16,13 @@ import {
 
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-import { registerSchema } from '@/migrations/00000-users';
-// import { getSafeReturnToPath } from '@/util/validation';
-// import { Props } from '../login/page';
+import { registerSchema } from '@/util/validation';
+import { getSafeReturnToPath } from '@/util/validation';
+import { SearchParams } from '@/util/types';
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
-export default function RegisterFormCard() {
+export default function RegisterFormCard(searchParams: SearchParams) {
   const [formData, setFormData] = useState<RegisterFormData>({
     username: '',
     email: '',
@@ -65,8 +65,9 @@ export default function RegisterFormCard() {
       }
 
       toast.success('Registration successful!');
-      // router.push(getSafeReturnToPath(props.searchParams.returnTo) || '/login');
-      router.push('/');
+      const params = await searchParams;
+      router.push(getSafeReturnToPath(params.returnTo) || '/login');
+      // router.push('/');
     } catch (error) {
       if (error instanceof z.ZodError) {
         // Set form errors

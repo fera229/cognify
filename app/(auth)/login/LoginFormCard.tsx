@@ -15,8 +15,8 @@ import {
 
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-import { loginSchema } from '@/migrations/00000-users';
-import { SearchParams } from './page';
+import { loginSchema } from '@/util/validation';
+import { SearchParams } from '@/util/types';
 import { getSafeReturnToPath } from '@/util/validation';
 
 type LoginFormData = z.infer<typeof loginSchema>;

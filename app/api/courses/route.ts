@@ -1,87 +1,78 @@
+//app/api/courses/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
 import { sql } from '@/database/connect';
-import { checkIfSessionIsValid } from '@/database/users';
+import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';
+import { cookies } from 'next/headers';
 
-const courseSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-});
-
-type CourseResponseBody = {
-  course?: {
-    id: number;
-    title: string;
-    created_at: string;
-    updated_at: string;
-    is_published: boolean;
-  };
-  errors?: {
-    message: string;
-  }[];
-};
-
-export async function POST(
-  request: NextRequest,
-): Promise<NextResponse<CourseResponseBody>> {
+export async function POST(request: NextRequest) {
   try {
-    // 1. Get and validate the request body
-    const body = await request.json();
-    const result = courseSchema.safeParse(body);
+    // 1. Verify the session
+    const validSession = await checkIfSessionIsValid();
+    if (!validSession) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
 
-    if (!result.success) {
+    // 2. Get the user from the session
+    const cookieStore = await cookies();
+
+    const user = await getUserFromSession();
+    if (!user) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+
+    // 3. Get the course title from the request body
+    const body = await request.json();
+    const { title } = body;
+
+    if (!title?.trim()) {
       return NextResponse.json(
-        { errors: [{ message: 'Title is required' }] },
+        { message: 'Title is required' },
         { status: 400 },
       );
     }
 
-    // 2. Verify user session
-    const validSession = await checkIfSessionIsValid();
-    if (!validSession) {
-      return NextResponse.json(
-        { errors: [{ message: 'Unauthorized' }] },
-        { status: 401 },
-      );
-    }
-
-    // 3. Create the course
+    // 4. Create the course with the instructor_id
     const [newCourse] = await sql`
       INSERT INTO
-        courses (title, is_published)
+        courses (
+          title,
+          instructor_id,
+          is_published
+        )
       VALUES
         (
-          ${result.data.title},
+          ${title.trim()},
+          ${user.id},
           FALSE
         )
       RETURNING
-        id,
-        title,
-        is_published,
-        created_at,
-        updated_at;
+        *
     `;
 
     if (!newCourse) {
-      throw new Error('Failed to create course');
+      return NextResponse.json(
+        { message: 'Failed to create course' },
+        { status: 500 },
+      );
     }
 
-    // 4. Return the new course data
     return NextResponse.json(
       {
         course: {
           id: newCourse.id,
           title: newCourse.title,
-          is_published: newCourse.is_published,
+          instructor_id: newCourse.instructor_id,
           created_at: newCourse.created_at,
-          updated_at: newCourse.updated_at,
+          is_published: newCourse.is_published,
         },
       },
       { status: 201 },
     );
   } catch (error) {
     console.error('Error creating course:', error);
+    console.log('[COURSES]', error);
     return NextResponse.json(
-      { errors: [{ message: 'Failed to create course' }] },
+      { message: 'Internal Server Error' },
       { status: 500 },
     );
   }

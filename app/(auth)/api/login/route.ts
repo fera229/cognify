@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserWithPasswordHashInsecure, User } from '@/database/users';
 import bcrypt from 'bcrypt';
-import { loginSchema } from '@/migrations/00000-users';
+import { loginSchema } from '@/util/validation';
 import crypto from 'node:crypto';
 import { createSessionInsecure } from '@/database/session';
 import { cookies } from 'next/headers';
-import path from 'node:path';
 import { secureCookieOptions } from '@/util/cookies';
 
 type LoginResponseBodyPost = {

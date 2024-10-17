@@ -15,7 +15,7 @@ function CreateNewCourse() {
 
   const isValid = title.trim().length > 0;
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!isValid) {
@@ -32,23 +32,27 @@ function CreateNewCourse() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ title: title.trim() }),
+        credentials: 'include', // Important for sending cookies
+        body: JSON.stringify({
+          title: title.trim(),
+        }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Error response:', errorData);
-        throw new Error('Network response was not ok');
+        throw new Error(errorData.message || 'Failed to create course');
       }
 
       const data = await response.json();
-      console.log('Response:', data);
-      router.push(`/teacher/courses/${data.course.id}` as any);
+      console.log('dataaa:', data);
+      router.push(`/teacher/courses/${data.course.id}`);
       toast.success('Course created!');
     } catch (error) {
       console.error('Error:', error);
       toast.error('Something went wrong, please try again later.');
-      setError('Failed to create course');
+      setError(
+        error instanceof Error ? error.message : 'Failed to create course',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -62,7 +66,7 @@ function CreateNewCourse() {
           What would you like to name your Course? Don't worry! you can change
           this later!
         </p>
-        <form onSubmit={onSubmit} className="space-y-8 mt-8">
+        <form onSubmit={handleSubmit} className="space-y-8 mt-8">
           <div>
             <label className="block text-sm font-medium">Course title</label>
             <Input

@@ -9,7 +9,7 @@ export const secureCookieOptions = {
   sameSite: 'lax', // CSRF protection
 } as const;
 
-export const checkValidSession = async () => {
+export const checkValidSession = async (): Promise<Boolean> => {
   // Task: Add redirect to home if user is logged in
   // 1. Checking if the sessionToken cookie exists
   const cookieStore = await cookies();
@@ -19,4 +19,8 @@ export const checkValidSession = async () => {
   // 3. If the sessionToken cookie is valid, redirect to home
   const validSession =
     sessionToken && (await getValidSession(sessionToken?.value));
+  if (validSession) {
+    return !!validSession;
+  }
+  return false;
 };
