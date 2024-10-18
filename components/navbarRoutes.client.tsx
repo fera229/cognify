@@ -13,7 +13,6 @@ type NavbarRoutesClientProps = {
 
 export function NavbarRoutesClient({ user }: NavbarRoutesClientProps) {
   const pathname = usePathname();
-  console.log('user: ', user);
   const isTeacherPage = pathname?.startsWith('/teacher');
   const isCourseContentPage = pathname?.includes('/chapter');
   const isInstructorMode = isTeacherPage || isCourseContentPage;

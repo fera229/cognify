@@ -5,6 +5,7 @@ export async function up(sql: Sql) {
     CREATE TABLE courses (
       id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
       title varchar(255) NOT NULL,
+      image_url text,
       description text,
       instructor_id integer,
       price float,

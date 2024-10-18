@@ -44,7 +44,7 @@ export async function PATCH(
         { status: 404 },
       );
     }
-
+    console.log(course);
     if (course.instructor_id !== user.id) {
       return NextResponse.json(
         { message: 'You are not the instructor of this course' },
@@ -59,6 +59,10 @@ export async function PATCH(
         title = coalesce(
           ${validatedData.title ?? null},
           title
+        ),
+        description = coalesce(
+          ${validatedData.description ?? null},
+          description
         )
       WHERE
         id = ${params.courseId}

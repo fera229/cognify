@@ -18,6 +18,7 @@
     "@radix-ui/react-select": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-switch": "^1.1.1",
+    "@uploadthing/react": "^7.0.3",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.0",
@@ -25,7 +26,7 @@
     "dotenv-safe": "^9.1.0",
     "ley": "^0.8.1",
     "lucide-react": "^0.446.0",
-    "next": "15.0.0-canary.195",
+    "next": "15.0.0-canary.197",
     "postgres": "^3.4.4",
     "react": "19.0.0-rc-e740d4b1-20240919",
     "react-dom": "19.0.0-rc-e740d4b1-20240919",
@@ -33,6 +34,7 @@
     "react-hot-toast": "^2.4.1",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
+    "uploadthing": "^7.1.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
