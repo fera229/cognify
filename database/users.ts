@@ -121,29 +121,6 @@ interface CookieStore {
   get: (name: string) => { value: string } | undefined;
 }
 
-// export async function getUserFromSession(
-//   cookieStore: CookieStore,
-// ): Promise<User | null> {
-//   const sessionToken = cookieStore?.get('sessionToken')?.value;
-
-//   if (!sessionToken) {
-//     return null;
-//   }
-
-//   const [user] = await sql<User[]>`
-//     SELECT
-//       users.*
-//     FROM
-//       users
-//       JOIN sessions ON sessions.user_id = users.id
-//     WHERE
-//       sessions.token = ${sessionToken}
-//       AND sessions.expiry_timestamp > now()
-//   `;
-
-//   return user || null;
-// }
-
 export const getUserFromSession = cache(async (): Promise<User | null> => {
   try {
     const cookieStore = await cookies();

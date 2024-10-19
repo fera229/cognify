@@ -11,7 +11,7 @@ export type Course = {
   id: number;
   title: string;
   description: string | null;
-  imageUrl: string | null;
+  image_url: string | null;
   instructor_id: number | null;
   price: number | null;
   is_published: boolean;

@@ -63,6 +63,14 @@ export async function PATCH(
         description = coalesce(
           ${validatedData.description ?? null},
           description
+        ),
+        image_url = coalesce(
+          ${validatedData.image_url ?? null},
+          image_url
+        ),
+        category_id = coalesce(
+          ${validatedData.category_id ?? null},
+          category_id
         )
       WHERE
         id = ${params.courseId}

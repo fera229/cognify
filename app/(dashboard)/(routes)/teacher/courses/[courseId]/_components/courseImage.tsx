@@ -1,33 +1,21 @@
 'use client';
 import React, { useState } from 'react';
 import * as z from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { Divide, ImageIcon, Pencil, PlusCircle } from 'lucide-react';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { ImageIcon, Pencil, PlusCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { FileUpload } from '@/components/uploadFile';
 
 export interface ImageFormProps {
-  initialData: { imageUrl?: string | null };
+  initialData: { image_url?: string | null };
   courseId: number;
 }
 
 const formSchema = z.object({
-  imageUrl: z.string().min(1, { message: 'Image is required.' }),
+  image_url: z.string().min(1, { message: 'Image is required.' }),
 });
 
 function ImageForm({ initialData, courseId }: ImageFormProps) {
@@ -35,13 +23,6 @@ function ImageForm({ initialData, courseId }: ImageFormProps) {
   const toggleEdit = () => setIsEditing((current) => !current);
 
   const router = useRouter();
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { imageUrl: initialData?.imageUrl || '' },
-  });
-
-  const { isValid, isSubmitting } = form.formState;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -53,7 +34,7 @@ function ImageForm({ initialData, courseId }: ImageFormProps) {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ image_url: values.imageUrl }),
+        body: JSON.stringify({ image_url: values.image_url }),
       });
 
       if (!response.ok) {
@@ -69,7 +50,7 @@ function ImageForm({ initialData, courseId }: ImageFormProps) {
       router.refresh();
     } catch (error) {
       console.error('Error updating course:', error);
-      toast.error('Failed to update course imageUrl');
+      toast.error('Failed to update image');
     }
   };
 
@@ -80,14 +61,14 @@ function ImageForm({ initialData, courseId }: ImageFormProps) {
         <Button variant="ghost" onClick={toggleEdit}>
           {isEditing && <>Cancel</>}
 
-          {!isEditing && !initialData?.imageUrl && (
+          {!isEditing && !initialData?.image_url && (
             <>
               <PlusCircle className="h-4 w-4 m-2" />
               Add image
             </>
           )}
 
-          {!isEditing && initialData?.imageUrl && (
+          {!isEditing && initialData?.image_url && (
             <>
               <Pencil className="h-4 w-4 m-2" />
               Edit image
@@ -96,17 +77,16 @@ function ImageForm({ initialData, courseId }: ImageFormProps) {
         </Button>
       </div>
       {!isEditing &&
-        (!initialData?.imageUrl ? (
+        (!initialData?.image_url ? (
           <div className="flex items-center justify-center h-60 bg-slate-200 rounded-md">
             <ImageIcon className="h-10 w-10 text-slate-500" />
           </div>
         ) : (
           <div className="relative aspect-video mt-2 ">
             <Image
-              src={initialData.imageUrl}
+              src={initialData.image_url}
               alt="Course image upload"
               fill
-              objectFit="cover"
               className="rounded-md"
             />
           </div>
@@ -118,7 +98,7 @@ function ImageForm({ initialData, courseId }: ImageFormProps) {
             endpoint="courseImage"
             onChange={(url) => {
               if (url) {
-                onSubmit({ imageUrl: url });
+                onSubmit({ image_url: url });
               }
             }}
           />

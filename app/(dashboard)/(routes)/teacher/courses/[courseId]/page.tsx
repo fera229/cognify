@@ -1,11 +1,12 @@
 import { redirect } from 'next/navigation';
-import { getCourseById } from '@/database/courses';
+import { getCategories, getCourseById } from '@/database/courses';
 import { getUserFromSession } from '@/database/users';
 import { IconBadge } from '@/components/icon-badge';
 import { LayoutDashboard } from 'lucide-react';
 import DescriptionForm from './_components/description';
 import TitleForm from './_components/title';
 import ImageForm from './_components/courseImage';
+import CategoryForm from './_components/category';
 
 type PageProps = {
   params: { courseId: string };
@@ -14,7 +15,11 @@ type PageProps = {
 export default async function CourseEditPage({ params }: PageProps) {
   const { courseId } = await params;
   const user = await getUserFromSession();
-  const course = await getCourseById(courseId);
+  const [course, categories] = await Promise.all([
+    getCourseById(courseId),
+    getCategories(),
+  ]);
+
   if (!user) {
     return redirect('/login');
   }
@@ -33,9 +38,10 @@ export default async function CourseEditPage({ params }: PageProps) {
   const completedFields = requiredFields.filter(Boolean).length;
 
   const completionIndicator = ` (${completedFields}/${totalFields})`;
+  console.log('Categories:', categories);
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-5xl mx-auto p-6 h-[1000px]">
       <h1 className="text-2xl font-bold mb-2">Edit Course</h1>
       <p className="text-muted-foreground mb-8">
         Complete your course information to publish it for students:
@@ -44,7 +50,7 @@ export default async function CourseEditPage({ params }: PageProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16 ">
         <div>
           <div className="flex items-center gap-x-2">
-            <IconBadge size="sm" icon={LayoutDashboard} />
+            <IconBadge icon={LayoutDashboard} />
             <h2 className="text-xl">Customize your course</h2>
           </div>
           <TitleForm initialData={course} courseId={course.id} />
@@ -54,7 +60,15 @@ export default async function CourseEditPage({ params }: PageProps) {
             courseId={course.id}
           />
 
-          <ImageForm />
+          <ImageForm initialData={course} courseId={course.id} />
+
+          <CategoryForm
+            initialData={{
+              category_id: course.category_id?.toString() || null,
+            }}
+            courseId={course.id}
+            categories={categories}
+          />
         </div>
       </div>
     </div>

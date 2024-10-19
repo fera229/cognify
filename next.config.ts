@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
     dynamicIO: true,
     typedRoutes: true,
   },
+  images: {
+    domains: ['utfs.io'],
+  },
 };
 
 export default nextConfig;

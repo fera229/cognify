@@ -1,6 +1,6 @@
 import { cache } from 'react';
 import { sql } from './connect';
-import { Course } from '@/util/types';
+import { Category, Course } from '@/util/types';
 import { CourseFormData } from '@/util/validation';
 
 export const getCourses = cache(async (): Promise<Course[]> => {
@@ -37,6 +37,7 @@ export const getCourseById = cache(
           id: number;
           title: string;
           description: string | null;
+          image_url: string | null;
           instructor_id: number | null;
           price: number | null;
           is_published: boolean;
@@ -69,3 +70,25 @@ export const getCourseById = cache(
     }
   },
 );
+
+export const getCategories = cache(async (): Promise<Category[]> => {
+  try {
+    const categories = await sql<{ id: number; name: string }[]>`
+      SELECT
+        id,
+        name
+      FROM
+        categories
+      ORDER BY
+        name ASC
+    `;
+
+    return categories?.map((category) => ({
+      label: category.name,
+      value: category.id.toString(),
+    }));
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch categories');
+  }
+});

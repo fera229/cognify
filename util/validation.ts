@@ -61,7 +61,11 @@ export const courseSchema = z.object({
 export const courseFormSchema = z
   .object({
     title: z.string().min(1, 'Title is required').optional(),
-    description: z.string().optional(),
+    image_url: z.string().url('Invalid image URL').optional(),
+    description: z
+      .string()
+      .max(1000, 'Description must not exceed 1000 characters')
+      .optional(),
     price: z.number().nonnegative('Price must be non-negative').optional(),
     category_id: z
       .number()
