@@ -1,10 +1,9 @@
-import { NextResponse } from 'next/server';
-import { sql } from '@/database/connect';
-import { validateCourseForm } from '@/util/validation';
+import { getCourseById, createAttachment } from '@/database/courses';
 import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';
-import { getCourseById } from '@/database/courses';
+import { validateCourseForm } from '@/util/validation';
+import { NextResponse } from 'next/server';
 
-export async function PATCH(
+export async function POST(
   request: Request,
   { params }: { params: { courseId: string } },
 ) {
@@ -52,56 +51,13 @@ export async function PATCH(
       );
     }
 
-    // Update the course data
+    const attachment = await createAttachment({
+      url: body.attachments,
+      name: body.attachments?.split('/').pop(),
+      courseId: courseId,
+    });
 
-    // const [updatedCourse] = await sql`
-    // UPDATE courses
-
-    // SET
-    // title = CASE
-    //   WHEN ${validatedData.title IS NOT NULL} THEN ${validatedData.title}
-    //   ELSE title
-    // END,
-
-    const [updatedCourse] = await sql`
-      UPDATE courses
-      SET
-        title = coalesce(
-          ${validatedData.title ?? null},
-          title
-        ),
-        description = coalesce(
-          ${validatedData.description ?? null},
-          description
-        ),
-        image_url = coalesce(
-          ${validatedData.image_url ?? null},
-          image_url
-        ),
-        category_id = coalesce(
-          ${validatedData.category_id ?? null},
-          category_id
-        ),
-        price = coalesce(
-          ${validatedData.price ?? null},
-          price
-        )
-      WHERE
-        id = ${params.courseId}
-      RETURNING
-        *
-    `;
-
-    console.log('Updated course:', updatedCourse);
-
-    if (!updatedCourse) {
-      return NextResponse.json(
-        { message: 'Failed to update course' },
-        { status: 500 },
-      );
-    }
-
-    return NextResponse.json(updatedCourse);
+    return NextResponse.json({ attachment }, { status: 200 });
   } catch (error) {
     console.error('Error updating course:', error);
     return NextResponse.json(

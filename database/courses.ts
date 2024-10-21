@@ -1,6 +1,6 @@
 import { cache } from 'react';
 import { sql } from './connect';
-import { Category, Course } from '@/util/types';
+import { Attachment, Category, Course } from '@/util/types';
 import { CourseFormData } from '@/util/validation';
 
 export const getCourses = cache(async (): Promise<Course[]> => {
@@ -92,3 +92,56 @@ export const getCategories = cache(async (): Promise<Category[]> => {
     throw new Error('Failed to fetch categories');
   }
 });
+
+export const getCourseAttachments = cache(
+  async (courseId: string): Promise<Attachment[]> => {
+    try {
+      const attachments = await sql<Attachment[]>`
+        SELECT
+          id,
+          name,
+          url,
+          course_id,
+          created_at,
+          updated_at
+        FROM
+          attachments
+        WHERE
+          course_id = ${courseId}
+      `;
+
+      return attachments.map((attachment) => ({
+        ...attachment,
+        created_at: new Date(attachment.created_at),
+        updated_at: new Date(attachment.updated_at),
+      }));
+    } catch (error) {
+      console.error('Database Error:', error);
+      throw new Error('Failed to fetch course attachments');
+    }
+  },
+);
+
+export const createAttachment = cache(
+  async (data: { url: string; name: string; courseId: number }) => {
+    try {
+      const [attachment] = await sql<Attachment[]>`
+        INSERT INTO
+          attachments (url, name, course_id)
+        VALUES
+          (
+            ${data.url},
+            ${data.name},
+            ${data.courseId}
+          )
+        RETURNING
+          *
+      `;
+
+      return attachment;
+    } catch (error) {
+      console.error('Database Error:', error);
+      throw new Error('Failed to create attachment');
+    }
+  },
+);

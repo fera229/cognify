@@ -8,7 +8,7 @@ export async function up(sql: Sql) {
       image_url text,
       description text,
       instructor_id integer,
-      price float,
+      price numeric(10, 2),
       is_published boolean DEFAULT FALSE,
       category_id integer,
       created_at timestamptz DEFAULT CURRENT_TIMESTAMP,

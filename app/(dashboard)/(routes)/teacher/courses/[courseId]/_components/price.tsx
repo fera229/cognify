@@ -1,14 +1,9 @@
 'use client';
-
 import React, { useState } from 'react';
 import * as z from 'zod';
-import { Pencil } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import toast from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
-import { cn } from '@/lib/utils';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { Pencil } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -18,24 +13,24 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
-import { Category } from '@/util/types';
-import { Combobox } from '@/components/ui/combobox';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
-export interface CategoryFormProps {
-  initialData: { category_id?: string | null };
+export interface PriceFormProps {
+  initialData: { price: number };
   courseId: number;
-  categories: Category[];
 }
 
 const formSchema = z.object({
-  category_id: z.string().min(1, { message: 'Category is required.' }),
+  price: z.coerce
+    .number()
+    .min(0, { message: 'Price must be a positive number' }),
 });
 
-function CategoryForm({
-  initialData,
-  courseId,
-  categories,
-}: CategoryFormProps) {
+function PriceForm({ initialData, courseId }: PriceFormProps) {
   const [isEditing, setIsEditing] = useState(false);
   const toggleEdit = () => setIsEditing((current) => !current);
 
@@ -43,24 +38,22 @@ function CategoryForm({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      category_id: initialData?.category_id || '',
-    },
+    defaultValues: { price: initialData?.price },
   });
 
   const { isValid, isSubmitting } = form.formState;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      console.log('Submitting values:', values);
+      console.log('Course ID:', courseId);
       const response = await fetch(`/api/courses/${courseId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({
-          category_id: values.category_id ? Number(values.category_id) : null,
-        }),
+        body: JSON.stringify({ price: values.price }),
       });
 
       if (!response.ok) {
@@ -68,30 +61,29 @@ function CategoryForm({
         throw new Error(errorData.message || 'Failed to update course');
       }
 
+      const updatedCourse = await response.json();
+      console.log('Updated course:', updatedCourse);
+
       toast.success('Course updated successfully');
       toggleEdit();
       router.refresh();
     } catch (error) {
       console.error('Error updating course:', error);
-      toast.error('Failed to update category');
+      toast.error('Failed to update course price');
     }
   };
-
-  const selectedCategory = categories.find(
-    (category) => category.value === initialData.category_id,
-  );
 
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Category
+        Course price
         <Button variant="ghost" onClick={toggleEdit}>
           {isEditing ? (
             <>Cancel</>
           ) : (
             <>
               <Pencil className="h-4 w-4 m-2" />
-              Edit category
+              Edit price
             </>
           )}
         </Button>
@@ -100,10 +92,10 @@ function CategoryForm({
         <p
           className={cn(
             'text-sm mt-2',
-            !initialData.category_id && 'text-slate-500 italic',
+            !initialData.price && 'text-slate-500 italic',
           )}
         >
-          {selectedCategory?.label || 'No category provided.'}
+          {'$ ' + initialData.price || 'No price provided'}
         </p>
       )}
       {isEditing && (
@@ -114,21 +106,23 @@ function CategoryForm({
           >
             <FormField
               control={form.control}
-              name="category_id"
+              name="price"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <Combobox
-                    options={categories?.map((category) => ({
-                      label: category.label,
-                      value: category.value,
-                    }))}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
+                <FormItem>
+                  <FormLabel>New price</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step={0.01}
+                      disabled={isSubmitting}
+                      placeholder="Set a price for your course"
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            ></FormField>
             <div className="flex items-center gap-x-2">
               <Button disabled={!isValid || isSubmitting} type="submit">
                 Save
@@ -141,4 +135,4 @@ function CategoryForm({
   );
 }
 
-export default CategoryForm;
+export default PriceForm;

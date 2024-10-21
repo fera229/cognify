@@ -123,7 +123,7 @@ interface CookieStore {
 
 export const getUserFromSession = cache(async (): Promise<User | null> => {
   try {
-    const cookieStore = await cookies();
+    const cookieStore: CookieStore = await cookies();
     // console.log('cookieStore:', cookieStore);
     const sessionToken = cookieStore.get('sessionToken')?.value;
 
@@ -148,3 +148,23 @@ export const getUserFromSession = cache(async (): Promise<User | null> => {
     return null;
   }
 });
+
+// export const getUserFromCourse = cache(async (courseId: number): Promise<User | null> => {
+//   try {
+//     const [user] = await sql<User[]>`
+//       SELECT
+//         users.*
+//       FROM
+//         users
+//         JOIN courses ON courses.instructor_id = users.id
+//       WHERE
+//         courses.id = ${courseId}
+//     `;
+
+//     return user || null;
+//   } catch (error) {
+//     console.error('Error in getUserFromCourse:', error);
+//     return null;
+//   }
+// }
+// )
