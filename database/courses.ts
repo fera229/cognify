@@ -145,3 +145,34 @@ export const createAttachment = cache(
     }
   },
 );
+
+export const deleteAttachment = cache(async (attachmentId: number) => {
+  try {
+    // verify the attachment exists
+    const [attachment] = await sql`
+      SELECT
+        id,
+        course_id
+      FROM
+        attachments
+      WHERE
+        id = ${attachmentId}
+    `;
+
+    if (!attachment) {
+      throw new Error('Attachment not found');
+    }
+
+    // Delete the attachment
+    await sql`
+      DELETE FROM attachments
+      WHERE
+        id = ${attachmentId}
+    `;
+
+    return attachment;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to delete attachment');
+  }
+});

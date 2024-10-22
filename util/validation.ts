@@ -1,3 +1,6 @@
+// import { getCourseById } from '@/database/courses';
+// import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';
+// import { NextResponse } from 'next/server';
 import { Route } from 'next';
 import { z } from 'zod';
 
@@ -110,3 +113,41 @@ export function getSafeReturnToPath(path: string | string[] | undefined) {
   if (!result.success) return undefined;
   return result.data as Route;
 }
+
+// export async function validateSessionAndUserAndCourseOwner({
+//   params,
+// }: {
+//   params: { courseId: number };
+// }) {
+//   // Verify the session
+//   const validSession = await checkIfSessionIsValid();
+//   if (!validSession) {
+//     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+//   }
+
+//   // Get the user from the session
+//   const user = await getUserFromSession();
+//   if (!user) {
+//     return NextResponse.json({ message: 'User not found' }, { status: 404 });
+//   }
+
+//   // Confirm the user is the instructor of the course
+//   if (typeof params.courseId === 'string') {
+//     const courseId = (params.courseId = parseInt(params.courseId, 10));
+//   }
+//   if (isNaN(params.courseId)) {
+//     return NextResponse.json({ message: 'Invalid course ID' }, { status: 400 });
+//   }
+
+//   const course = await getCourseById(params.courseId.toString());
+//   if (!course) {
+//     return NextResponse.json({ message: 'Course not found' }, { status: 404 });
+//   }
+
+//   if (course.instructor_id !== user.id) {
+//     return NextResponse.json(
+//       { message: 'You are not the instructor of this course' },
+//       { status: 403 },
+//     );
+//   }
+// }

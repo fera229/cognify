@@ -1,14 +1,14 @@
-import { getCourseById, createAttachment } from '@/database/courses';
+import { deleteAttachment, getCourseById } from '@/database/courses';
 import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';
-import { validateCourseForm } from '@/util/validation';
+import { error } from 'console';
 import { NextResponse } from 'next/server';
 
-export async function POST(
+export async function DELETE(
   request: Request,
-  { params }: { params: { courseId: string } },
+  { params }: { params: { courseId: string; attachmentId: string } },
 ) {
   try {
-    const body = await request.json();
+    // do all validations:
 
     // Verify the session
     const validSession = await checkIfSessionIsValid();
@@ -24,9 +24,10 @@ export async function POST(
 
     // Confirm the user is the instructor of the course
     const courseId = parseInt(params.courseId, 10);
-    if (isNaN(courseId)) {
+    const attachmentId = parseInt(params.attachmentId, 10);
+    if (isNaN(courseId) || isNaN(attachmentId)) {
       return NextResponse.json(
-        { message: 'Invalid course ID' },
+        { message: 'Invalid course ID or Attachment ID' },
         { status: 400 },
       );
     }
@@ -46,23 +47,12 @@ export async function POST(
       );
     }
 
-    // Create the attachment with the provided name
-    const attachment = await createAttachment({
-      url: body.attachments,
-      name:
-        body.name || body.attachments.split('/').pop() || 'Unnamed attachment',
-      courseId: courseId,
-    });
-
-    return NextResponse.json({ attachment }, { status: 200 });
-  } catch (error) {
-    console.error('Error creating attachment:', error);
+    await deleteAttachment(attachmentId);
+    return NextResponse.json({ message: 'Attachment deleted' });
+  } catch {
+    console.log('Error deleting attachment', error);
     return NextResponse.json(
-      {
-        message:
-          error instanceof Error ? error.message : 'Internal server error',
-        details: error instanceof Error ? error.stack : undefined,
-      },
+      { message: 'Failed to delete attachment' },
       { status: 500 },
     );
   }

@@ -41,8 +41,4 @@ next-env.d.ts
 
 .eslintcache
 
-/ssl
 
-db.js
-
-server.mjs
