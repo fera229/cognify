@@ -1,234 +1,106 @@
-'use client';
-
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Rocket, Book, Users, GraduationCap } from 'lucide-react';
+import Image from 'next/image';
+import RegisterFormCard from './register-form-card';
 import * as z from 'zod';
-import toast from 'react-hot-toast';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { getSafeReturnToPath, registerSchema } from '@/util/validation';
 
-import { Input } from '@/components/ui/input';
-import Link from 'next/link';
-import { registerSchema } from '@/util/validation';
-import { getSafeReturnToPath } from '@/util/validation';
-import { SearchParams } from '@/util/types';
-
-type RegisterFormData = z.infer<typeof registerSchema>;
-
-export default function RegisterFormCard(searchParams: SearchParams) {
-  const [formData, setFormData] = useState<RegisterFormData>({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: '',
-  });
-  const [errors, setErrors] = useState<Partial<RegisterFormData>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
-    if (errors[name as keyof RegisterFormData]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrors({});
-
-    try {
-      // Validate form data
-      const validatedData = registerSchema.parse(formData);
-
-      const response = await fetch('api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(validatedData),
-      });
-
-      const data = await response.json();
-      console.log(data);
-      if (!response.ok) {
-        throw new Error(data.errors[0].message || 'Registration failed');
-      }
-
-      toast.success('Registration successful!');
-      const params = await searchParams;
-      router.push(getSafeReturnToPath(params.returnTo) || '/login');
-      // router.push('/');
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        // Set form errors
-        const newErrors: Partial<RegisterFormData> = {};
-        error.errors.forEach((err) => {
-          if (err.path) {
-            newErrors[err.path[0] as keyof RegisterFormData] = err.message;
-          }
-        });
-        setErrors(newErrors);
-      } else {
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : 'An unexpected error occurred',
-        );
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+export default function RegisterForm({
+  params,
+}: {
+  params: { returnTo: string };
+}) {
+  const safeReturnToPath = getSafeReturnToPath(params?.returnTo) || '/';
 
   return (
-    <div className="flex justify-center items-center h-full gap-y-8">
-      <Card className="w-[350px]">
-        <CardHeader>
-          <CardTitle>Register</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            onSubmit={async (e) => await handleSubmit(e)}
-            className="flex flex-col gap-y-5"
-          >
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Username
-              </label>
-              <Input
-                id="username"
-                name="username"
-                type="text"
-                value={formData.username}
-                onChange={handleInputChange}
-                disabled={isLoading}
-                placeholder=" Your username"
-                className={`p-3 ${errors.username ? 'border-red-500' : ''}`}
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-10">
+      {/* Left side - Hero section */}
+      <div className="flex flex-col justify-between bg-slate-50 p-6 md:p-8 lg:p-12 col-span-6 order-2 lg:order-1">
+        <div className="space-y-6 md:space-y-8">
+          <div className="text-center mt-10 pt-10m          ">
+            <h1 className="text-3xl md:text-4xl font-bold mt-6 lg:mt-10">
+              Start Your Teaching Journey Today with Cognify
+            </h1>
+            <p className="text-slate-600 text-base md:text-lg mt-4">
+              Join our community of educators and share your knowledge with
+              students worldwide.
+            </p>
+          </div>
+          <div className="flex items-center justify-center">
+            <div className="relative flex justify-center lg:justify-start mt-8 lg:mt-auto mx-auto lg:mx-0 w-full max-w-lg">
+              <Image
+                src="/registration.svg"
+                alt="Illustration of a woman studying online."
+                width={600}
+                height={400}
+                className="object-contain"
+                priority
               />
-              {errors.username && (
-                <p className="mt-1 text-xs text-red-500">{errors.username}</p>
-              )}
             </div>
-            <div className='"mb-10"'>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email
-              </label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                disabled={isLoading}
-                placeholder="xyz@example.com"
-                className={errors.email ? 'border-red-500' : ''}
-              />
-              {errors.email && (
-                <p className="mt-1 text-xs text-red-500">{errors.email}</p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="role"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Role
-              </label>
-              <select
-                required
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={(e) =>
-                  setFormData({ ...formData, role: e.target.value })
-                }
-                className="mt-1 block w-full p-3 border border-gray-300 rounded-md"
-              >
-                <option value="" disabled>
-                  Select your role
-                </option>
+          </div>
 
-                <option value="Instructor">Instructor</option>
-                <option value="Student">Student</option>
-              </select>
-            </div>
-            <div className='"mb-6"'>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                disabled={isLoading}
-                placeholder="********"
-                className={errors.password ? 'border-red-500' : ''}
-              />
+          {/* Feature grid */}
+          <div className="flex justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 lg:mt-12 ">
+              <div className="flex items-start space-x-4 p-4 bg-white/50 rounded-lg hover:bg-white/70 transition-colors">
+                <div className="bg-blue-100 p-2 rounded-lg shrink-0">
+                  <Rocket className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Launch Your Course</h3>
+                  <p className="text-slate-500 text-sm">
+                    Create and publish courses with ease
+                  </p>
+                </div>
+              </div>
 
-              {errors.password && (
-                <p className="mt-1 text-xs text-red-500">{errors.password}</p>
-              )}
-            </div>
-            <div className="mb-6">
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Confirm Password
-              </label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                disabled={isLoading}
-                placeholder="********"
-                className={errors.confirmPassword ? 'border-red-500' : ''}
-              />
-              {errors.confirmPassword && (
-                <p className="mt-1 text-xs text-red-500">
-                  {errors.confirmPassword}
-                </p>
-              )}
-            </div>
+              <div className="flex items-start space-x-4 p-4 bg-white/50 rounded-lg hover:bg-white/70 transition-colors">
+                <div className="bg-green-100 p-2 rounded-lg shrink-0">
+                  <Book className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Flexible Content</h3>
+                  <p className="text-slate-500 text-sm">
+                    Structure your content your way
+                  </p>
+                </div>
+              </div>
 
-            <Button type="submit" disabled={isLoading} className="w-full mt-8">
-              {isLoading ? 'Registering...' : 'Register'}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter>
-          <p className="text-center text-sm w-full">
-            Already have an account?{' '}
-            <Link href="/login" className="underline">
-              Log in
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
+              <div className="flex items-start space-x-4 p-4 bg-white/50 rounded-lg hover:bg-white/70 transition-colors">
+                <div className="bg-purple-100 p-2 rounded-lg shrink-0">
+                  <Users className="h-6 w-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Global Reach</h3>
+                  <p className="text-slate-500 text-sm">
+                    Connect with students worldwide
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4 p-4 bg-white/50 rounded-lg hover:bg-white/70 transition-colors">
+                <div className="bg-red-100 p-2 rounded-lg shrink-0">
+                  <GraduationCap className="h-6 w-6 text-red-700" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Register as a student</h3>
+                  <p className="text-slate-500 text-sm">
+                    and browse courses in a variety of disciplines
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Illustration container */}
+      </div>
+
+      {/* Right side - Registration form (1/3) */}
+      <div className="col-span-4 w-full flex items-center justify-center p-6 md:p-8 lg:p-12 order-1 lg:order-2">
+        <div className="w-full max-w-md">
+          <RegisterFormCard returnTo={safeReturnToPath} />
+        </div>
+      </div>
     </div>
   );
 }

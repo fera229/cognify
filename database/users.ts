@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 export type User = {
   id: number;
-  username: string;
+  name: string;
   email: string;
   role: string;
   created_at: Date;
@@ -18,16 +18,16 @@ type UserWithPasswordHash = User & {
   password_hash: string;
 };
 
-export const getUserInsecure = cache(async (username: string) => {
+export const getUserInsecure = cache(async (name: string) => {
   const [user] = await sql<User[]>`
     SELECT
       users.id,
-      users.username,
+      users.name,
       users.email
     FROM
       users
     WHERE
-      users.username = ${username.toLowerCase()}
+      users.name = ${name.toLowerCase()}
   `;
   return user;
 });
@@ -67,32 +67,27 @@ export const getUserWithPasswordHashInsecure = cache(async (email: string) => {
 });
 
 export const createUserInsecure = cache(
-  async (
-    username: string,
-    email: string,
-    password_hash: string,
-    role: string,
-  ) => {
+  async (name: string, email: string, password_hash: string, role: string) => {
     try {
-      console.log('Creating user:', { username, email, password_hash, role });
+      console.log('Creating user:', { name, email, password_hash, role });
       const [user] = await sql<User[]>`
         INSERT INTO
           users (
-            username,
+            name,
             email,
             password_hash,
             role
           )
         VALUES
           (
-            ${username.toLowerCase()},
+            ${name.toLowerCase()},
             ${email.toLowerCase()},
             ${password_hash},
             ${role}
           )
         RETURNING
           users.id,
-          users.username,
+          users.name,
           users.email,
           users.role
       `;

@@ -1,9 +1,10 @@
 import React from 'react';
-import RegisterFormCard from './register-form';
+import RegisterFormCard from './register-form-card';
 import { cookies } from 'next/headers';
 import { getValidSession } from '@/database/session';
 import { redirect } from 'next/navigation';
 import { getSafeReturnToPath } from '@/util/validation';
+import RegisterForm from './register-form';
 
 export default async function RegisterPage({
   params,
@@ -28,7 +29,8 @@ export default async function RegisterPage({
     // 4. If the sessionToken cookie is invalid or doesn't exist, show the registration form
 
     const safeReturnToPath = getSafeReturnToPath(params.returnTo) || '/';
-    return <RegisterFormCard returnTo={safeReturnToPath} />;
+
+    return <RegisterForm params={params} />;
   } catch (error) {
     console.error('Error in RegisterPage:', error);
     // Handle the error appropriately, maybe show an error message to the user

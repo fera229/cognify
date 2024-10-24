@@ -8,7 +8,7 @@ import { cookies } from 'next/headers';
 import { secureCookieOptions } from '@/util/cookies';
 
 type LoginResponseBodyPost = {
-  user: Pick<User, 'username'>;
+  user: Pick<User, 'name'>;
   errors: {
     message: string;
   }[];
@@ -27,7 +27,7 @@ export async function POST(
   if (!validatedData.success) {
     return NextResponse.json(
       {
-        user: { username: '' },
+        user: { name: '' },
         errors: validatedData.error.issues,
       },
       { status: 400 },
@@ -47,8 +47,8 @@ export async function POST(
   if (!userWithPasswordHash) {
     return NextResponse.json(
       {
-        user: { username: '' },
-        errors: [{ message: 'Username or password invalid' }],
+        user: { name: '' },
+        errors: [{ message: ' or password invalid' }],
       },
       { status: 400 },
     );
@@ -63,8 +63,8 @@ export async function POST(
   if (!isPasswordValid) {
     return NextResponse.json(
       {
-        user: { username: '' },
-        errors: [{ message: 'Username or password invalid' }],
+        user: { name: '' },
+        errors: [{ message: ' or password invalid' }],
       },
       { status: 400 },
     );
@@ -83,7 +83,7 @@ export async function POST(
   if (!session) {
     return NextResponse.json(
       {
-        user: { username: '' },
+        user: { name: '' },
         errors: [{ message: 'Session creation failed' }],
       },
       { status: 401 },
@@ -98,7 +98,7 @@ export async function POST(
   });
 
   return NextResponse.json({
-    user: { username: userWithPasswordHash.username },
+    user: { name: userWithPasswordHash.name },
     errors: [],
   });
 }

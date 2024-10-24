@@ -59,7 +59,7 @@ function CreateNewCourse() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto flex md:justify-center h-full p-6">
+    <div className="max-w-5xl mx-auto flex md:justify-center h-full p-6 mt-10">
       <div>
         <h1 className="text-2xl">Create a new Course</h1>
         <p className="text-sm text-slate-600">

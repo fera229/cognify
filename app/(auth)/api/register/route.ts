@@ -29,7 +29,7 @@ export async function POST(
       {
         user: {
           id: 0,
-          username: '',
+          name: '',
           email: '',
           role: '',
           created_at: new Date(),
@@ -45,7 +45,7 @@ export async function POST(
 
   // 3. Check if the user already exists in the database
 
-  const user = await getUserInsecure(validatedData.data.username);
+  const user = await getUserInsecure(validatedData.data.name);
   const email = await getUserInsecure(validatedData.data.email);
 
   if (user || email) {
@@ -53,7 +53,7 @@ export async function POST(
       {
         user: {
           id: 0,
-          username: '',
+          name: '',
           email: '',
           role: '',
           created_at: new Date(),
@@ -72,7 +72,7 @@ export async function POST(
   // 5. Save the user data with hashed pw to the database and return the user data
 
   const newUser = await createUserInsecure(
-    validatedData.data.username,
+    validatedData.data.name,
     validatedData.data.email,
     hashedPassword,
     validatedData.data.role,
@@ -82,7 +82,7 @@ export async function POST(
       {
         user: {
           id: 0,
-          username: '',
+          name: '',
           email: '',
           role: '',
           created_at: new Date(),
@@ -104,7 +104,7 @@ export async function POST(
       {
         user: {
           id: 0,
-          username: '',
+          name: '',
           email: '',
           role: '',
           created_at: new Date(),

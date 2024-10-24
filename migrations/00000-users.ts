@@ -4,7 +4,7 @@ export async function up(sql: Sql) {
   await sql`
     CREATE TABLE users (
       id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-      username varchar(255) NOT NULL,
+      name varchar(255) NOT NULL,
       email varchar(255) NOT NULL UNIQUE,
       password_hash varchar(255) NOT NULL,
       role varchar(50) NOT NULL,
