@@ -8,7 +8,6 @@ import { getUserFromSession } from '@/database/users';
 import { IconBadge } from '@/components/icon-badge';
 import {
   CircleDollarSign,
-  File,
   Files,
   LayoutDashboard,
   ListChecks,

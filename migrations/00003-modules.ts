@@ -9,7 +9,7 @@ export async function up(sql: Sql) {
       "order" INTEGER,
       created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (course_id) REFERENCES COURSES(id)
+      FOREIGN KEY (course_id) REFERENCES COURSES(id) ON DELETE CASCADE
     );
   `;
 }

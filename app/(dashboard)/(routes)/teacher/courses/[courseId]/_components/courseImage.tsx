@@ -96,7 +96,7 @@ function ImageForm({ initialData, courseId }: ImageFormProps) {
         <div>
           <FileUpload
             endpoint="courseImage"
-            onChange={(url) => {
+            action={(url) => {
               if (url) {
                 onSubmit({ image_url: url });
               }

@@ -1,4 +1,3 @@
-// app/(dashboard)/layout.tsx
 import { Suspense } from 'react';
 import { Sidebar } from './_components/sidebar';
 import { Navbar } from './_components/navbar';

@@ -103,7 +103,7 @@ importers:
         specifier: ^8.1.6
         version: 8.1.6
       '@types/node':
-        specifier: ^20
+        specifier: ^20.16.6
         version: 20.16.6
       '@types/react':
         specifier: ^18
@@ -145,7 +145,7 @@ importers:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.16.6)(typescript@5.6.2)
       typescript:
-        specifier: ^5
+        specifier: ^5.6.2
         version: 5.6.2
 
 packages:

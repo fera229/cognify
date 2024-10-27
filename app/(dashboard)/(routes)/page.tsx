@@ -1,4 +1,3 @@
-// app/(dashboard)/(routes)/page.tsx
 import { Suspense } from 'react';
 import { getCategories, getCourses } from '@/database/courses';
 

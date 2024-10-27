@@ -189,10 +189,7 @@ function AttachmentForm({ initialData, courseId }: AttachmentFormProps) {
 
       {isEditing && (
         <div>
-          <FileUpload
-            endpoint="courseAttachment"
-            onChange={handleFileSelected}
-          />
+          <FileUpload endpoint="courseAttachment" action={handleFileSelected} />
           <div className="text-xs text-muted-foreground mt-4">
             Add any useful resources that might help your students.
           </div>
