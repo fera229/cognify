@@ -15,5 +15,5 @@ export async function up(sql: Sql) {
 }
 
 export async function down(sql: Sql) {
-  await sql` DROP TABLE IF EXISTS users; `;
+  await sql` DROP TABLE IF EXISTS users cascade; `;
 }

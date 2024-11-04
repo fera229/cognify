@@ -17,7 +17,57 @@ export type Course = {
   category_id: number | null;
   created_at: Date;
   updated_at: Date;
+  modules?: Module[];
 };
+export type Module = {
+  id: number;
+  title: string;
+  description: string | null;
+  position: number;
+  course_id: number;
+  is_published: boolean;
+  is_free: boolean;
+  created_at: Date;
+  updated_at: Date;
+  // Relation
+  lessons?: Lesson[];
+};
+
+export type Lesson = {
+  id: number;
+  title: string;
+  description: string | null;
+  position: number;
+  module_id: number;
+  is_published: boolean;
+  is_free: boolean;
+  video_url: string | null;
+  duration: number | null;
+  created_at: Date;
+  updated_at: Date;
+  // Relations
+  muxData?: MuxData;
+  userProgress?: UserProgress[];
+};
+
+export type MuxData = {
+  id: number;
+  lesson_id: number;
+  asset_id: string;
+  playback_id: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type UserProgress = {
+  id: number;
+  user_id: number;
+  lesson_id: number;
+  is_completed: boolean;
+  created_at: Date;
+  updated_at: Date;
+};
+
 export type Attachment = {
   id: number;
   name: string;

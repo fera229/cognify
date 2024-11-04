@@ -48,7 +48,7 @@ export async function POST(
     return NextResponse.json(
       {
         user: { name: '' },
-        errors: [{ message: ' or password invalid' }],
+        errors: [{ message: 'Email or password invalid' }],
       },
       { status: 400 },
     );
@@ -64,7 +64,7 @@ export async function POST(
     return NextResponse.json(
       {
         user: { name: '' },
-        errors: [{ message: ' or password invalid' }],
+        errors: [{ message: 'Email or password invalid' }],
       },
       { status: 400 },
     );

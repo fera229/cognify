@@ -12,24 +12,29 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import Editor from '@/components/text-editor';
 
 export interface DescriptionFormProps {
   initialData: { description: string };
   courseId: number;
+  entityId: number;
+  entityType: 'course' | 'module';
 }
 
 const formSchema = z.object({
   description: z.string().min(1, { message: 'Description is required.' }),
 });
 
-function DescriptionForm({ initialData, courseId }: DescriptionFormProps) {
+function DescriptionForm({
+  initialData,
+  courseId,
+  entityId,
+  entityType,
+}: DescriptionFormProps) {
   const [isEditing, setIsEditing] = useState(false);
   const toggleEdit = () => setIsEditing((current) => !current);
 
@@ -44,9 +49,12 @@ function DescriptionForm({ initialData, courseId }: DescriptionFormProps) {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      console.log('Submitting values:', values);
-      console.log('Course ID:', courseId);
-      const response = await fetch(`/api/courses/${courseId}`, {
+      const url =
+        entityType === 'course'
+          ? `/api/courses/${entityId}`
+          : `/api/courses/${courseId}/modules/${entityId}`;
+
+      const response = await fetch(url, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -57,25 +65,25 @@ function DescriptionForm({ initialData, courseId }: DescriptionFormProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update course');
+        throw new Error(errorData.message || 'Failed to update description');
       }
 
-      const updatedCourse = await response.json();
-      console.log('Updated course:', updatedCourse);
-
-      toast.success('Course updated successfully');
+      const updatedEntity = await response.json();
+      toast.success(
+        `${entityType.charAt(0).toUpperCase() + entityType.slice(1)} updated successfully`,
+      );
       toggleEdit();
       router.refresh();
     } catch (error) {
-      console.error('Error updating course:', error);
-      toast.error('Failed to update course description');
+      console.error('Error updating description:', error);
+      toast.error(`Failed to update ${entityType} description`);
     }
   };
 
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Course description
+        {entityType === 'course' ? 'Course description' : 'Module description'}
         <Button variant="ghost" onClick={toggleEdit}>
           {isEditing ? (
             <>Cancel</>
@@ -88,14 +96,15 @@ function DescriptionForm({ initialData, courseId }: DescriptionFormProps) {
         </Button>
       </div>
       {!isEditing && (
-        <p
+        <div
           className={cn(
             'text-sm mt-2',
             !initialData.description && 'text-slate-500 italic',
           )}
-        >
-          {initialData.description || 'No description provided.'}
-        </p>
+          dangerouslySetInnerHTML={{
+            __html: initialData.description || 'No description provided.',
+          }}
+        />
       )}
       {isEditing && (
         <Form {...form}>
@@ -108,19 +117,18 @@ function DescriptionForm({ initialData, courseId }: DescriptionFormProps) {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>New description</FormLabel>
+                  <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea
-                      className="bg-white"
+                    <Editor
+                      onChange={field.onChange}
+                      value={field.value}
                       disabled={isSubmitting}
-                      placeholder="This course is about..."
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
-            ></FormField>
+            />
             <div className="flex items-center gap-x-2">
               <Button disabled={!isValid || isSubmitting} type="submit">
                 Save

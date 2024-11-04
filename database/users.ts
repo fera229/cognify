@@ -9,7 +9,7 @@ export type User = {
   id: number;
   name: string;
   email: string;
-  role: string;
+  role: 'Student' | 'Instructor' | 'Admin';
   created_at: Date;
   updated_at: Date;
 };
@@ -19,7 +19,7 @@ type UserWithPasswordHash = User & {
 };
 
 export const getUserInsecure = cache(async (name: string) => {
-  const [user] = await sql<User[]>`
+  const [user] = await sql<Omit<User[], 'role' | 'created_at' | 'updated_at'>>`
     SELECT
       users.id,
       users.name,
@@ -118,8 +118,7 @@ interface CookieStore {
 
 export const getUserFromSession = cache(async (): Promise<User | null> => {
   try {
-    const cookieStore: CookieStore = await cookies();
-    // console.log('cookieStore:', cookieStore);
+    const cookieStore = await cookies();
     const sessionToken = cookieStore.get('sessionToken')?.value;
 
     if (!sessionToken) {

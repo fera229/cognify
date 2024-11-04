@@ -29,7 +29,8 @@ export async function PATCH(
     }
 
     // Confirm the user is the instructor of the course
-    const courseId = parseInt(params.courseId, 10);
+    const awaitedParams = await params;
+    const courseId = parseInt(awaitedParams.courseId, 10);
     if (isNaN(courseId)) {
       return NextResponse.json(
         { message: 'Invalid course ID' },

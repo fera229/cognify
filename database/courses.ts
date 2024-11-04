@@ -32,8 +32,10 @@ export const getCourses = cache(async (): Promise<Course[]> => {
 export const getCourseById = cache(
   async (courseId: string): Promise<Course | null> => {
     try {
-      const [row] = await sql<
+      // First, let's get the course with its modules in a single query
+      const rows = await sql<
         {
+          // Course fields
           id: number;
           title: string;
           description: string | null;
@@ -44,24 +46,69 @@ export const getCourseById = cache(
           category_id: number | null;
           created_at: string;
           updated_at: string;
+          // Module fields (prefixed to avoid name collisions)
+          module_id: number | null;
+          module_title: string | null;
+          module_description: string | null;
+          module_position: number | null;
+          module_is_published: boolean | null;
+          module_created_at: string | null;
+          module_updated_at: string | null;
         }[]
       >`
         SELECT
-          *
+          c.*,
+          m.id AS module_id,
+          m.title AS module_title,
+          m.description AS module_description,
+          m.position AS module_position,
+          m.is_published AS module_is_published,
+          m.created_at AS module_created_at,
+          m.updated_at AS module_updated_at
         FROM
-          courses
+          courses c
+          LEFT JOIN modules m ON c.id = m.course_id
         WHERE
-          id = ${courseId}
+          c.id = ${courseId}
+        ORDER BY
+          m.position ASC
       `;
 
-      if (!row) return null;
+      if (!rows.length) return null;
 
-      // Map the row to the Course type
-      const course: Course = {
-        ...row,
-        created_at: new Date(row.created_at),
-        updated_at: new Date(row.updated_at),
-      };
+      // Since we're using LEFT JOIN, all rows will have course data
+      // but module data might be null if there are no modules
+      if (!rows[0]) return null;
+
+      const course = {
+        id: rows[0].id,
+        title: rows[0].title,
+        description: rows[0].description,
+        image_url: rows[0].image_url,
+        instructor_id: rows[0].instructor_id,
+        price: rows[0].price,
+        is_published: rows[0].is_published,
+        category_id: rows[0].category_id,
+        created_at: new Date(rows[0].created_at),
+        updated_at: new Date(rows[0].updated_at),
+        modules: rows[0].module_id ? [] : undefined, // Initialize modules array only if we have modules
+      } as Course;
+
+      // If we have modules, process them
+      if (rows[0].module_id) {
+        course.modules = rows
+          .map((row) => ({
+            id: row.module_id!,
+            title: row.module_title!,
+            description: row.module_description,
+            position: row.module_position!,
+            course_id: course.id,
+            is_published: row.module_is_published!,
+            created_at: new Date(row.module_created_at!),
+            updated_at: new Date(row.module_updated_at!),
+          }))
+          .filter((module) => module.id !== null);
+      }
 
       return course;
     } catch (error) {
@@ -107,7 +154,7 @@ export const getCourseAttachments = cache(
         FROM
           attachments
         WHERE
-          course_id = ${courseId}
+          course_id = ${Number(courseId)}
       `;
 
       return attachments.map((attachment) => ({

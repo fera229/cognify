@@ -21,13 +21,22 @@ import { useRouter } from 'next/navigation';
 export interface TitleFormProps {
   initialData: { title: string };
   courseId: number;
+  entityId: number;
+  entityType: 'course' | 'module' | 'lesson';
+  moduleId?: number; // Only required for lessons
 }
 
 const formSchema = z.object({
   title: z.string().min(1, { message: 'Title is required.' }),
 });
 
-function TitleForm({ initialData, courseId }: TitleFormProps) {
+function TitleForm({
+  initialData,
+  courseId,
+  entityId,
+  entityType,
+  moduleId,
+}: TitleFormProps) {
   const [isEditing, setIsEditing] = useState(false);
   const toggleEdit = () => setIsEditing((current) => !current);
 
@@ -42,9 +51,22 @@ function TitleForm({ initialData, courseId }: TitleFormProps) {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      console.log('Submitting values:', values);
-      console.log('Course ID:', courseId);
-      const response = await fetch(`/api/courses/${courseId}`, {
+      let url;
+      switch (entityType) {
+        case 'course':
+          url = `/api/courses/${entityId}`;
+          break;
+        case 'module':
+          url = `/api/courses/${courseId}/modules/${entityId}`;
+          break;
+        case 'lesson':
+          url = `/api/courses/${courseId}/modules/${moduleId}/lessons/${entityId}`;
+          break;
+        default:
+          throw new Error('Invalid entity type');
+      }
+
+      const response = await fetch(url, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -55,25 +77,40 @@ function TitleForm({ initialData, courseId }: TitleFormProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update course');
+        throw new Error(errorData.message || `Failed to update ${entityType}`);
       }
 
-      const updatedCourse = await response.json();
-      console.log('Updated course:', updatedCourse);
-
-      toast.success('Course updated successfully');
+      toast.success(
+        `${
+          entityType.charAt(0).toUpperCase() + entityType.slice(1)
+        } updated successfully`,
+      );
       toggleEdit();
       router.refresh();
     } catch (error) {
-      console.error('Error updating course:', error);
-      toast.error('Failed to update course title');
+      console.error(`Error updating ${entityType}:`, error);
+      toast.error(`Failed to update ${entityType} title`);
     }
   };
+
+  const labelText =
+    entityType === 'course'
+      ? 'Course title'
+      : entityType === 'module'
+        ? 'Module title'
+        : 'Lesson title';
+
+  const placeholderText =
+    entityType === 'course'
+      ? 'e.g. "Introduction to Computer Science"'
+      : entityType === 'module'
+        ? 'e.g. "Module 1 | How to get the best out of this course"'
+        : 'e.g. "Lesson 1 | Introduction to the topic"';
 
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Course title
+        {labelText}
         <Button variant="ghost" onClick={toggleEdit}>
           {isEditing ? (
             <>Cancel</>
@@ -102,14 +139,14 @@ function TitleForm({ initialData, courseId }: TitleFormProps) {
                     <Input
                       className="bg-white"
                       disabled={isSubmitting}
-                      placeholder="i.e. Introduction to Computer Science"
+                      placeholder={placeholderText}
                       {...field}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
-            ></FormField>
+            />
             <div className="flex items-center gap-x-2">
               <Button disabled={!isValid || isSubmitting} type="submit">
                 Save

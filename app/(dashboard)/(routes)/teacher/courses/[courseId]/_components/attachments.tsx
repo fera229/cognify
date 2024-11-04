@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import * as z from 'zod';
-import { File, Loader2, PlusCircle, X } from 'lucide-react';
+import { File, Loader2, PlusCircle, Trash2 } from 'lucide-react';
 import { Attachment, Course } from '@/util/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -176,7 +176,7 @@ function AttachmentForm({ initialData, courseId }: AttachmentFormProps) {
                         className="ml-auto hover:opacity-50 transition"
                         onClick={() => onDeleteAttachment(attachment.id)}
                       >
-                        <X className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
@@ -202,35 +202,42 @@ function AttachmentForm({ initialData, courseId }: AttachmentFormProps) {
             <DialogTitle>Name your attachment</DialogTitle>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Input
-                id="name"
-                placeholder="Enter attachment name"
-                value={attachmentName}
-                onChange={(e) => setAttachmentName(e.target.value)}
-              />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (attachmentName.trim()) {
+                handleAttNameSubmit();
+              }
+            }}
+          >
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Input
+                  id="name"
+                  placeholder="Enter attachment name"
+                  value={attachmentName}
+                  onChange={(e) => setAttachmentName(e.target.value)}
+                />
+              </div>
             </div>
-          </div>
 
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowNameDialog(false);
-                setSelectedFile(null);
-                setAttachmentName('');
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAttNameSubmit}
-              disabled={!attachmentName.trim()}
-            >
-              Upload
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowNameDialog(false);
+                  setSelectedFile(null);
+                  setAttachmentName('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!attachmentName.trim()}>
+                Upload
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

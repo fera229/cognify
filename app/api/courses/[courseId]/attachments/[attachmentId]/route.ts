@@ -1,3 +1,4 @@
+// app/api/courses/[courseId]/attachments/[attachmentId]/route.ts
 import { deleteAttachment, getCourseById } from '@/database/courses';
 import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';
 import { error } from 'console';
@@ -23,8 +24,10 @@ export async function DELETE(
     }
 
     // Confirm the user is the instructor of the course
-    const courseId = parseInt(params.courseId, 10);
-    const attachmentId = parseInt(params.attachmentId, 10);
+    const paramsAwaited = await params;
+
+    const courseId = parseInt(paramsAwaited.courseId, 10);
+    const attachmentId = parseInt(paramsAwaited.attachmentId, 10);
     if (isNaN(courseId) || isNaN(attachmentId)) {
       return NextResponse.json(
         { message: 'Invalid course ID or Attachment ID' },

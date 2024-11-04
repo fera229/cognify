@@ -1,21 +1,23 @@
-import { Sql } from "postgres";
+import { Sql } from 'postgres';
 
 export async function up(sql: Sql) {
   await sql`
-    CREATE TABLE MODULES (
-      id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-      course_id INTEGER,
-      title VARCHAR(255) NOT NULL,
-      "order" INTEGER,
-      created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (course_id) REFERENCES COURSES(id) ON DELETE CASCADE
+    CREATE TABLE modules (
+      id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+      title varchar(255) NOT NULL,
+      description text,
+      POSITION integer NOT NULL,
+      course_id integer NOT NULL REFERENCES courses (id) ON DELETE cascade,
+      is_published boolean DEFAULT FALSE,
+      is_free boolean DEFAULT FALSE,
+      created_at timestamptz DEFAULT CURRENT_TIMESTAMP,
+      updated_at timestamptz DEFAULT CURRENT_TIMESTAMP
     );
   `;
+  await sql`CREATE INDEX idx_modules_course_id ON modules (course_id);`;
+  await sql`CREATE INDEX idx_modules_position ON modules (POSITION);`;
 }
 
 export async function down(sql: Sql) {
-  await sql`
-    DROP TABLE IF EXISTS MODULES;
-  `;
+  await sql` DROP TABLE IF EXISTS modules cascade; `;
 }
