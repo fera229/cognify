@@ -38,7 +38,7 @@ export async function PATCH(
       );
     }
 
-    const course = await getCourseById(params.courseId);
+    const course = await getCourseById(awaitedParams.courseId);
     if (!course) {
       return NextResponse.json(
         { message: 'Course not found' },
@@ -88,7 +88,7 @@ export async function PATCH(
           price
         )
       WHERE
-        id = ${params.courseId}
+        id = ${awaitedParams.courseId}
       RETURNING
         *
     `;
