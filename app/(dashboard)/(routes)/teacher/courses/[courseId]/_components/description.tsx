@@ -22,7 +22,8 @@ export interface DescriptionFormProps {
   initialData: { description: string };
   courseId: number;
   entityId: number;
-  entityType: 'course' | 'module';
+  moduleId?: number; // Only required for lessons
+  entityType: 'course' | 'module' | 'lesson';
 }
 
 const formSchema = z.object({
@@ -34,6 +35,7 @@ function DescriptionForm({
   courseId,
   entityId,
   entityType,
+  moduleId,
 }: DescriptionFormProps) {
   const [isEditing, setIsEditing] = useState(false);
   const toggleEdit = () => setIsEditing((current) => !current);
@@ -49,11 +51,20 @@ function DescriptionForm({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const url =
-        entityType === 'course'
-          ? `/api/courses/${entityId}`
-          : `/api/courses/${courseId}/modules/${entityId}`;
-
+      let url;
+      switch (entityType) {
+        case 'course':
+          url = `/api/courses/${entityId}`;
+          break;
+        case 'module':
+          url = `/api/courses/${courseId}/modules/${entityId}`;
+          break;
+        case 'lesson':
+          url = `/api/courses/${courseId}/modules/${moduleId}/lessons/${entityId}`;
+          break;
+        default:
+          throw new Error('Invalid entity type');
+      }
       const response = await fetch(url, {
         method: 'PATCH',
         headers: {
@@ -79,11 +90,16 @@ function DescriptionForm({
       toast.error(`Failed to update ${entityType} description`);
     }
   };
-
+  const labelText =
+    entityType === 'course'
+      ? 'Course description'
+      : entityType === 'module'
+        ? 'Module description'
+        : 'Lesson description';
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        {entityType === 'course' ? 'Course description' : 'Module description'}
+        {labelText}
         <Button variant="ghost" onClick={toggleEdit}>
           {isEditing ? (
             <>Cancel</>
