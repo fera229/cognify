@@ -1,4 +1,3 @@
-// app/api/courses/[courseId]/modules/reorder/route.ts
 import { NextResponse } from 'next/server';
 import { sql } from '@/database/connect';
 import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';
@@ -15,6 +14,8 @@ export async function PUT(
   { params }: { params: { courseId: string } },
 ) {
   try {
+    const paramsAwaited = await params;
+
     // Validate session
     const validSession = await checkIfSessionIsValid();
     if (!validSession) {
@@ -28,7 +29,7 @@ export async function PUT(
     }
 
     // Parse and validate courseId
-    const courseId = parseInt(params.courseId, 10);
+    const courseId = parseInt(paramsAwaited.courseId, 10);
     if (isNaN(courseId)) {
       return NextResponse.json(
         { message: 'Invalid course ID' },
@@ -37,7 +38,7 @@ export async function PUT(
     }
 
     // Verify course exists and user is its creator
-    const course = await getCourseById(params.courseId);
+    const course = await getCourseById(paramsAwaited.courseId);
     if (!course) {
       return NextResponse.json(
         { message: 'Course not found' },

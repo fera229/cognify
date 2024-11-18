@@ -1,5 +1,3 @@
-// app/api/courses/[courseId]/modules/route.ts
-
 import { NextResponse } from 'next/server';
 import { sql } from '@/database/connect';
 import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';

@@ -1,48 +1,92 @@
 'use client';
 
-import { ConfirmModal } from '@/components/modals/cofirm-modal';
-import { Button } from '@/components/ui/button';
-import { Trash } from 'lucide-react';
 import { useState } from 'react';
-import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { Trash } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ConfirmModal } from '@/components/modals/cofirm-modal';
+import toast from 'react-hot-toast';
+import { Lesson } from '@/util/types';
 
-interface ModuleActionsProps {
-  disabled: boolean;
-  moduleId: number;
-  courseId: number;
-  isPublished: boolean;
+interface ModuleActionData {
+  courseId: string;
+  moduleId: string;
+  is_published: boolean;
+  lessons: Lesson[];
 }
 
-export default function ModuleActions({
-  disabled,
-  moduleId,
-  courseId,
-  isPublished,
-}: ModuleActionsProps) {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+interface ModuleActionsProps {
+  data: ModuleActionData;
+  disabled?: boolean;
+  isComplete?: boolean;
+}
 
-  const onDelete = async () => {
+export function ModuleActions({
+  data,
+  disabled,
+  isComplete,
+}: ModuleActionsProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  // Check if module has any published lessons
+  const hasPublishedLessons = data.lessons?.some(
+    (lesson) => lesson.is_published,
+  );
+
+  const onPublish = async () => {
     try {
       setIsLoading(true);
 
+      if (!data.is_published && !hasPublishedLessons) {
+        toast.error('Publish at least one lesson first');
+        return;
+      }
+
+      const endpoint = data.is_published ? 'unpublish' : 'publish';
       const response = await fetch(
-        `/api/courses/${courseId}/modules/${moduleId}`,
+        `/api/courses/${data.courseId}/modules/${data.moduleId}/${endpoint}`,
         {
-          method: 'DELETE',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
           },
         },
       );
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to delete module');
+        throw new Error(responseData.message || 'Failed to update module');
+      }
+
+      toast.success(
+        data.is_published ? 'Module unpublished' : 'Module published',
+      );
+      router.refresh();
+    } catch (error) {
+      toast.error('Something went wrong');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onDelete = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `/api/courses/${data.courseId}/modules/${data.moduleId}`,
+        {
+          method: 'DELETE',
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error();
       }
 
       toast.success('Module deleted');
-      router.push(`/teacher/courses/${courseId}`);
+      router.push(`/teacher/courses/${data.courseId}`);
       router.refresh();
     } catch {
       toast.error('Something went wrong');
@@ -53,8 +97,26 @@ export default function ModuleActions({
 
   return (
     <div className="flex items-center gap-x-2">
-      <ConfirmModal onConfirm={onDelete}>
-        <Button disabled={isLoading} variant="destructive" size="sm">
+      <Button
+        onClick={onPublish}
+        disabled={
+          disabled ||
+          isLoading ||
+          !isComplete ||
+          (!data.is_published && !hasPublishedLessons)
+        }
+        variant="outline"
+        size="sm"
+        className="bg-slate-200 hover:bg-slate-300"
+      >
+        {isLoading ? 'Loading...' : data.is_published ? 'Unpublish' : 'Publish'}
+      </Button>
+      <ConfirmModal
+        onConfirm={onDelete}
+        title="Delete module"
+        description="This will permanently delete this module and all its lessons."
+      >
+        <Button size="sm" disabled={isLoading} variant="destructive">
           <Trash className="h-4 w-4" />
         </Button>
       </ConfirmModal>

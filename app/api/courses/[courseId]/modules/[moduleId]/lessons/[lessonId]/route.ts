@@ -1,8 +1,12 @@
-// app/api/courses/[courseId]/modules/[moduleId]/lessons/[lessonId]/route.ts
 import { NextResponse } from 'next/server';
 import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';
 import { getCourseById } from '@/database/courses';
-import { updateLesson, deleteLesson, getLessonById } from '@/database/lessons';
+import {
+  updateLesson,
+  deleteLesson,
+  getLessonById,
+  getPublishedLessonsCount,
+} from '@/database/lessons';
 import { z } from 'zod';
 
 const updateLessonSchema = z.object({
@@ -11,14 +15,13 @@ const updateLessonSchema = z.object({
   is_free: z.boolean().optional(),
   video_url: z.string().optional(),
 });
-
-export async function PATCH(
-  req: Request,
-  {
-    params,
-  }: { params: { courseId: string; moduleId: string; lessonId: string } },
-) {
+type Params = {
+  params: { courseId: string; moduleId: string; lessonId: string };
+};
+export async function PATCH(req: Request, { params }: Params) {
   try {
+    const paramsAwaited = await params;
+
     const validSession = await checkIfSessionIsValid();
     if (!validSession) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -29,22 +32,26 @@ export async function PATCH(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const course = await getCourseById(params.courseId);
+    const course = await getCourseById(paramsAwaited.courseId);
     if (!course) {
       return NextResponse.json(
         { message: 'Course not found' },
         { status: 404 },
       );
     }
-
+    //check course ownership
     if (course.instructor_id !== user.id) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
+    console.log('body: ' + body);
     const validatedData = updateLessonSchema.parse(body);
 
-    const updatedLesson = await updateLesson(params.lessonId, validatedData);
+    const updatedLesson = await updateLesson(
+      paramsAwaited.lessonId,
+      validatedData,
+    );
 
     return NextResponse.json(updatedLesson);
   } catch (error) {
@@ -66,6 +73,8 @@ export async function DELETE(
   }: { params: { courseId: string; moduleId: string; lessonId: string } },
 ) {
   try {
+    const paramsAwaited = await params;
+
     const validSession = await checkIfSessionIsValid();
     if (!validSession) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -76,7 +85,7 @@ export async function DELETE(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const course = await getCourseById(params.courseId);
+    const course = await getCourseById(paramsAwaited.courseId);
     if (!course) {
       return NextResponse.json(
         { message: 'Course not found' },
@@ -88,7 +97,7 @@ export async function DELETE(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    await deleteLesson(params.lessonId);
+    await deleteLesson(paramsAwaited.lessonId);
 
     return NextResponse.json({ message: 'Lesson deleted' });
   } catch (error) {
@@ -104,6 +113,8 @@ export async function GET(
   }: { params: { courseId: string; moduleId: string; lessonId: string } },
 ) {
   try {
+    const paramsAwaited = await params;
+
     const validSession = await checkIfSessionIsValid();
     if (!validSession) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -114,7 +125,7 @@ export async function GET(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const course = await getCourseById(params.courseId);
+    const course = await getCourseById(paramsAwaited.courseId);
     if (!course) {
       return NextResponse.json(
         { message: 'Course not found' },
@@ -123,7 +134,7 @@ export async function GET(
     }
 
     // For instructors or enrolled students
-    const lesson = await getLessonById(params.lessonId);
+    const lesson = await getLessonById(paramsAwaited.lessonId);
     if (!lesson) {
       return NextResponse.json(
         { message: 'Lesson not found' },

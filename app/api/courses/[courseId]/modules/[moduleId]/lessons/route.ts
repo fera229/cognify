@@ -1,4 +1,3 @@
-// app/api/courses/[courseId]/modules/[moduleId]/lessons/route.ts
 import { NextResponse } from 'next/server';
 import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';
 import { getCourseById } from '@/database/courses';
@@ -16,6 +15,8 @@ export async function POST(
   { params }: { params: { courseId: string; moduleId: string } },
 ) {
   try {
+    const paramsAwaited = await params;
+
     // Verify session
     const validSession = await checkIfSessionIsValid();
     if (!validSession) {
@@ -29,7 +30,7 @@ export async function POST(
     }
 
     // Verify course and ownership
-    const course = await getCourseById(params.courseId);
+    const course = await getCourseById(paramsAwaited.courseId);
     if (!course) {
       return NextResponse.json(
         { message: 'Course not found' },
@@ -49,7 +50,7 @@ export async function POST(
     const validatedData = createLessonSchema.parse(body);
 
     // Create the lesson
-    const newLesson = await createLesson(parseInt(params.moduleId), {
+    const newLesson = await createLesson(parseInt(paramsAwaited.moduleId), {
       title: validatedData.title,
       description: validatedData.description,
       is_free: validatedData.isFree,
@@ -71,12 +72,14 @@ export async function POST(
   }
 }
 
-// Add this if you need to get all lessons for a module
+// Get all lessons for a module
 export async function GET(
   req: Request,
   { params }: { params: { courseId: string; moduleId: string } },
 ) {
   try {
+    const paramsAwaited = await params;
+
     const validSession = await checkIfSessionIsValid();
     if (!validSession) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -87,7 +90,7 @@ export async function GET(
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    const course = await getCourseById(params.courseId);
+    const course = await getCourseById(paramsAwaited.courseId);
     if (!course) {
       return NextResponse.json(
         { message: 'Course not found' },
@@ -97,7 +100,7 @@ export async function GET(
 
     // For instructors, return all lessons
     // For students, return only published lessons or lessons they have access to
-    const lessons = await getLessonsByModuleId(params.moduleId);
+    const lessons = await getLessonsByModuleId(paramsAwaited.moduleId);
 
     return NextResponse.json(lessons);
   } catch (error) {

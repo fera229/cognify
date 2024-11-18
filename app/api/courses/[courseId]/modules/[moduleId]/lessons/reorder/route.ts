@@ -13,6 +13,8 @@ export async function PUT(
   { params }: { params: { courseId: string; moduleId: string } },
 ) {
   try {
+    const paramsAwaited = await params;
+
     // Validate session
     const validSession = await checkIfSessionIsValid();
     if (!validSession) {
@@ -26,7 +28,7 @@ export async function PUT(
     }
 
     // Parse and validate courseId
-    const courseId = parseInt(params.courseId, 10);
+    const courseId = parseInt(paramsAwaited.courseId, 10);
     if (isNaN(courseId)) {
       return NextResponse.json(
         { message: 'Invalid course ID' },
@@ -35,7 +37,7 @@ export async function PUT(
     }
 
     // Verify course exists and user is its creator
-    const course = await getCourseById(params.courseId);
+    const course = await getCourseById(paramsAwaited.courseId);
     if (!course) {
       return NextResponse.json(
         { message: 'Course not found' },
@@ -63,7 +65,7 @@ export async function PUT(
           updated_at = CURRENT_TIMESTAMP
         WHERE
           id = ${lessonId}
-          AND module_id = ${params.moduleId}
+          AND module_id = ${paramsAwaited.moduleId}
       `;
     }
 

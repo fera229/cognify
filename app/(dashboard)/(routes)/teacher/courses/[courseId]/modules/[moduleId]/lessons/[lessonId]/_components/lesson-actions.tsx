@@ -7,41 +7,75 @@ import { Button } from '@/components/ui/button';
 import { ConfirmModal } from '@/components/modals/cofirm-modal';
 import toast from 'react-hot-toast';
 
-interface LessonActionsProps {
-  disabled: boolean;
+interface LessonActionData {
   courseId: string;
-  moduleId: string;
   lessonId: string;
-  isPublished: boolean;
+  moduleId: string;
+  is_published: boolean;
 }
 
-export const LessonActions = ({
-  disabled,
-  courseId,
-  moduleId,
-  lessonId,
-  isPublished,
-}: LessonActionsProps) => {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+interface LessonsActionsProps {
+  data: LessonActionData;
+  disabled?: boolean;
+  isComplete?: boolean;
+}
 
-  const onClick = async () => {
+export function LessonsActions({
+  data,
+  disabled,
+  isComplete,
+}: LessonsActionsProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const onPublish = async () => {
     try {
       setIsLoading(true);
+      console.log('Starting lesson publish action:', {
+        currentState: data.is_published,
+      });
 
-      const response = await fetch(
-        `/api/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}/publish`,
-        {
-          method: isPublished ? 'DELETE' : 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-        },
+      if (!data.is_published) {
+        const response = await fetch(
+          `/api/courses/${data.courseId}/modules/${data.moduleId}/lessons/${data.lessonId}/publish`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+        const responseData = await response.json();
+        console.log('Server response:', responseData);
+
+        if (!response.ok) {
+          throw new Error(responseData.message || 'Failed to update lesson');
+        }
+      } else {
+        const response = await fetch(
+          `/api/courses/${data.courseId}/modules/${data.moduleId}/lessons/${data.lessonId}/unpublish`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+        const responseData = await response.json();
+        console.log('Server response:', responseData);
+
+        if (!response.ok) {
+          throw new Error(responseData.message || 'Failed to update lesson');
+        }
+      }
+
+      toast.success(
+        data.is_published ? 'Lesson unpublished' : 'Lesson published',
       );
 
-      if (!response.ok) throw new Error('Failed to toggle publish status');
-
-      toast.success(isPublished ? 'Lesson unpublished' : 'Lesson published');
       router.refresh();
-    } catch {
+    } catch (error) {
+      console.error('Publish action failed:', error);
       toast.error('Something went wrong');
     } finally {
       setIsLoading(false);
@@ -51,19 +85,20 @@ export const LessonActions = ({
   const onDelete = async () => {
     try {
       setIsLoading(true);
-
       const response = await fetch(
-        `/api/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
+        `/api/courses/${data.courseId}/modules/${data.moduleId}/lessons/${data.lessonId}`,
         {
           method: 'DELETE',
         },
       );
 
-      if (!response.ok) throw new Error('Failed to delete lesson');
+      if (!response.ok) {
+        throw new Error();
+      }
 
-      toast.success('Lesson deleted');
+      toast.success('Lesson deleted successfully');
+      router.push(`/teacher/courses/${data.courseId}/modules/${data.moduleId}`);
       router.refresh();
-      router.push(`/teacher/courses/${courseId}/modules/${moduleId}`);
     } catch {
       toast.error('Something went wrong');
     } finally {
@@ -74,18 +109,23 @@ export const LessonActions = ({
   return (
     <div className="flex items-center gap-x-2">
       <Button
-        onClick={onClick}
-        disabled={disabled || isLoading}
+        onClick={onPublish}
+        disabled={disabled || isLoading || !isComplete}
         variant="outline"
         size="sm"
+        className="bg-slate-200 hover:bg-slate-300"
       >
-        {isPublished ? 'Unpublish' : 'Publish'}
+        {isLoading ? 'Loading...' : data.is_published ? 'Unpublish' : 'Publish'}
       </Button>
-      <ConfirmModal onConfirm={onDelete}>
-        <Button size="sm" disabled={isLoading}>
+      <ConfirmModal
+        onConfirm={onDelete}
+        title="Delete lesson"
+        description="This will permanently delete this lesson and its content."
+      >
+        <Button size="sm" disabled={isLoading} variant="destructive">
           <Trash className="h-4 w-4" />
         </Button>
       </ConfirmModal>
     </div>
   );
-};
+}

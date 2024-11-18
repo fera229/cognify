@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -126,6 +126,10 @@ export default function LessonsForm({
     const lessonIds = items.map((lesson) => lesson.id);
     onReorder({ lessonIds });
   };
+
+  useEffect(() => {
+    router.refresh();
+  }, [router]);
 
   return (
     <div className="relative mt-6 border bg-slate-100 rounded-md p-4">
