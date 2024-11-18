@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { registerSchema } from '@/util/validation';
 import { getSafeReturnToPath } from '@/util/validation';
-import { SearchParams } from '@/util/types';
+import type { SearchParams } from '@/util/types';
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 

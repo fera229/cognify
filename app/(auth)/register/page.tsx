@@ -24,7 +24,9 @@ export default async function RegisterPage({ searchParams }: PageProps) {
     }
 
     // Pass the returnTo parameter to the registration form
-    const safeReturnToPath = getSafeReturnToPath(searchParams.returnTo) || '/';
+    const searchParamsAwaited = await searchParams;
+    const safeReturnToPath =
+      getSafeReturnToPath(searchParamsAwaited.returnTo) || '/';
 
     return <RegisterForm params={{ returnTo: safeReturnToPath }} />;
   } catch (error) {

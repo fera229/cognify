@@ -1,4 +1,3 @@
-// app/(auth)/login/page.tsx
 import LoginForm from './LoginForm';
 import { redirect } from 'next/navigation';
 import { getSafeReturnToPath } from '@/util/validation';

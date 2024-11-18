@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserWithPasswordHashInsecure, User } from '@/database/users';
+import { getUserWithPasswordHashInsecure } from '@/database/users';
+import type { User } from '@/database/users';
 import bcrypt from 'bcrypt';
 import { loginSchema } from '@/util/validation';
 import crypto from 'node:crypto';

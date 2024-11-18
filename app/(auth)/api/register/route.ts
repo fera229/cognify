@@ -1,127 +1,123 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createUserInsecure, getUserInsecure, User } from '@/database/users';
+import { sql } from '@/database/connect';
 import bcrypt from 'bcrypt';
 import { registerSchema } from '@/util/validation';
 import { cookies } from 'next/headers';
-import { createSessionInsecure } from '@/database/session';
 import crypto from 'node:crypto';
-import { secureCookieOptions } from '@/util/cookies';
 
-type RegisterResponseBodyPost = {
-  user: User;
-  errors: {
-    message: string;
-  }[];
-};
-export async function POST(
-  request: NextRequest,
-): Promise<NextResponse<RegisterResponseBodyPost>> {
-  // task: implement the user registeration workflow
-  // 1. Get the user data from the request body
-  const body = await request.json();
+export async function POST(request: NextRequest) {
+  try {
+    // 1. Get the user data from the request body
+    const body = await request.json();
 
-  // 2. Validate the user data using the zod schema
+    // 2. Validate the user data
+    const validatedData = registerSchema.safeParse(body);
+    console.log('validated data: ', validatedData);
 
-  const validatedData = registerSchema.safeParse(body);
+    if (!validatedData.success) {
+      return NextResponse.json(
+        {
+          user: null,
+          errors: validatedData.error.issues,
+        },
+        { status: 400 },
+      );
+    }
 
-  if (!validatedData.success) {
+    // 3. Get database connection
+
+    // 4. Check if user exists
+    const [existingUser] = await sql`
+      SELECT
+        id
+      FROM
+        users
+      WHERE
+        email = ${validatedData.data.email.toLowerCase()}
+        OR name = ${validatedData.data.name.toLowerCase()}
+    `;
+
+    if (existingUser) {
+      return NextResponse.json(
+        {
+          user: null,
+          errors: [{ message: 'User already exists' }],
+        },
+        { status: 400 },
+      );
+    }
+
+    // 5. Hash password
+    const hashedPassword = await bcrypt.hash(validatedData.data.password, 12);
+
+    // 6. Create user
+    const [newUser] = await sql`
+      INSERT INTO
+        users (
+          name,
+          email,
+          password_hash,
+          role
+        )
+      VALUES
+        (
+          ${validatedData.data.name.toLowerCase()},
+          ${validatedData.data.email.toLowerCase()},
+          ${hashedPassword},
+          ${validatedData.data.role}
+        )
+      RETURNING
+        id,
+        name,
+        email,
+        role
+    `;
+
+    if (!newUser) {
+      throw new Error('Failed to create user');
+    }
+
+    // 7. Create session
+    const token = crypto.randomBytes(100).toString('base64');
+
+    const [session] = await sql`
+      INSERT INTO
+        sessions (token, user_id)
+      VALUES
+        (
+          ${token},
+          ${newUser.id}
+        )
+      RETURNING
+        token
+    `;
+
+    if (!session) {
+      throw new Error('Failed to create session');
+    }
+
+    // 8. Set cookie
+    (await cookies()).set({
+      name: 'sessionToken',
+      value: session.token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24, // 24 hours
+    });
+
+    return NextResponse.json({
+      user: newUser,
+      errors: [],
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
     return NextResponse.json(
       {
-        user: {
-          id: 0,
-          name: '',
-          email: '',
-          role: '',
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-        errors: validatedData.error.issues,
+        user: null,
+        errors: [{ message: 'Internal server error during registration' }],
       },
-      { status: 400 },
+      { status: 500 },
     );
   }
-
-  console.log('validated data: ', validatedData);
-
-  // 3. Check if the user already exists in the database
-
-  const user = await getUserInsecure(validatedData.data.name);
-  const email = await getUserInsecure(validatedData.data.email);
-
-  if (user || email) {
-    return NextResponse.json(
-      {
-        user: {
-          id: 0,
-          name: '',
-          email: '',
-          role: '',
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-        errors: [{ message: 'User already taken' }],
-      },
-      { status: 400 },
-    );
-  }
-
-  // 4. Hash the user password
-
-  const hashedPassword = await bcrypt.hash(validatedData.data.password, 12);
-
-  // 5. Save the user data with hashed pw to the database and return the user data
-
-  const newUser = await createUserInsecure(
-    validatedData.data.name,
-    validatedData.data.email,
-    hashedPassword,
-    validatedData.data.role,
-  );
-  if (!newUser) {
-    return NextResponse.json(
-      {
-        user: {
-          id: 0,
-          name: '',
-          email: '',
-          role: '',
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-        errors: [{ message: 'Sign up Failed' }],
-      },
-      { status: 400 },
-    );
-  }
-
-  const token = crypto.randomBytes(100).toString('base64');
-
-  // 7. create the session record
-  const session = await createSessionInsecure(token, newUser.id);
-
-  if (!session) {
-    return NextResponse.json(
-      {
-        user: {
-          id: 0,
-          name: '',
-          email: '',
-          role: '',
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-        errors: [{ message: 'Session creation failed' }],
-      },
-      { status: 401 },
-    );
-  }
-  // 8. send the new cookie in the headers
-
-  (await cookies()).set({
-    name: 'sessionToken',
-    value: session.token,
-    ...secureCookieOptions,
-  });
-
-  return NextResponse.json({ user: newUser, errors: [] });
 }
