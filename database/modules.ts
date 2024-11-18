@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { sql } from './connect';
 import { Lesson, Module } from '@/util/types';
+import { unpublishCourse } from './courses';
 
 type ModuleFormDB = {
   id: number;
@@ -170,6 +171,8 @@ export const getModuleById = cache(
               l.description,
               'is_free',
               l.is_free,
+              'is_published',
+              l.is_published, -- FFFFFUUUUUCCCCCKKKKKKKKKK!
               'position',
               l.position
             )
@@ -237,6 +240,125 @@ export const updateModule = cache(
     } catch (error) {
       console.error('Database Error:', error);
       throw new Error('Failed to update module');
+    }
+  },
+);
+
+export const publishModule = cache(
+  async (moduleId: string): Promise<Module | null> => {
+    try {
+      // First verify there is at least one published lesson
+      const [{ count }] = await sql<[{ count: number }]>`
+        SELECT
+          count(*)::int
+        FROM
+          lessons
+        WHERE
+          module_id = ${moduleId}
+          AND is_published = TRUE
+      `;
+
+      if (count === 0) {
+        throw new Error('Cannot publish module without published lessons');
+      }
+
+      const [updatedModule] = await sql<Module[]>`
+        UPDATE modules
+        SET
+          is_published = TRUE,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE
+          id = ${moduleId}
+          AND is_published = FALSE
+        RETURNING
+          *
+      `;
+
+      if (!updatedModule) return null;
+
+      return {
+        ...updatedModule,
+        created_at: new Date(updatedModule.created_at),
+        updated_at: new Date(updatedModule.updated_at),
+      };
+    } catch (error) {
+      console.error('[PUBLISH_MODULE]', error);
+      throw error;
+    }
+  },
+);
+
+export const unpublishModule = cache(
+  async (
+    moduleId: string,
+  ): Promise<{
+    module: Module | null;
+    courseUnpublished: boolean;
+  }> => {
+    try {
+      return await sql.begin(async (sql) => {
+        // 1. Get the module to find its course_id
+        const [moduleToUpdate] = await sql<Module[]>`
+          SELECT
+            *
+          FROM
+            modules
+          WHERE
+            id = ${moduleId}
+        `;
+
+        if (!moduleToUpdate) {
+          return { module: null, courseUnpublished: false };
+        }
+
+        // 2. Unpublish the module
+        const [updatedModule] = await sql<Module[]>`
+          UPDATE modules
+          SET
+            is_published = FALSE,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE
+            id = ${moduleId}
+          RETURNING
+            *
+        `;
+
+        // 3. Check if it was the last published module
+        const [{ count }] = await sql<[{ count: number }]>`
+          SELECT
+            count(*)::int
+          FROM
+            modules
+          WHERE
+            course_id = ${moduleToUpdate.course_id}
+            AND is_published = TRUE
+            AND id != ${moduleId}
+        `;
+
+        let courseUnpublished = false;
+
+        // 4. If no published modules remain, cascade to course
+        if (count === 0) {
+          const updatedCourse = await unpublishCourse(
+            moduleToUpdate.course_id.toString(),
+          );
+          courseUnpublished = !!updatedCourse;
+        }
+        if (!updatedModule) {
+          throw new Error('Failed to unpublish module');
+        }
+        return {
+          module: {
+            ...updatedModule,
+            created_at: new Date(updatedModule.created_at),
+            updated_at: new Date(updatedModule.updated_at),
+          },
+          courseUnpublished,
+        };
+      });
+    } catch (error) {
+      console.error('[UNPUBLISH_MODULE]', error);
+      throw new Error('Failed to unpublish module');
     }
   },
 );

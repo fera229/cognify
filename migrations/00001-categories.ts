@@ -1,4 +1,3 @@
-// migrations/00001-categories.ts
 import { Sql } from 'postgres';
 
 export async function up(sql: Sql) {

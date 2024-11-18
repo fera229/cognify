@@ -50,6 +50,36 @@ export type Lesson = {
   userProgress?: UserProgress[];
 };
 
+export type CourseFromDB = {
+  id: number;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  instructor_id: number;
+  price: number | null;
+  is_published: boolean;
+  category_id: number | null;
+  created_at: string;
+  updated_at: string;
+  modules: Array<{
+    id: number;
+    title: string;
+    description: string | null;
+    position: number;
+    course_id: number;
+    is_published: boolean;
+    is_free: boolean;
+    created_at: string;
+    updated_at: string;
+  }> | null;
+};
+export type VideoUploadResponse = {
+  asset_id: string;
+  playback_id: string;
+  duration: number;
+  status: 'preparing' | 'ready' | 'errored';
+};
+
 export type MuxData = {
   id: number;
   lesson_id: number;
@@ -57,6 +87,15 @@ export type MuxData = {
   playback_id: string;
   created_at: Date;
   updated_at: Date;
+  duration?: number; // Add duration for AI context
+  status?: string; // Track processing status
+};
+
+export type TranscriptSegment = {
+  text: string;
+  start_time: number;
+  end_time: number;
+  speaker?: string; // Optional field for later (detect instructor?)
 };
 
 export type UserProgress = {

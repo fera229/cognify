@@ -1,7 +1,7 @@
 // import { getCourseById } from '@/database/courses';
 // import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';
 // import { NextResponse } from 'next/server';
-import { Route } from 'next';
+import type { Route } from 'next';
 import { z } from 'zod';
 
 // Validate user registration data

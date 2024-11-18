@@ -259,37 +259,103 @@ export const publishLesson = cache(
 );
 
 export const unpublishLesson = cache(
-  async (lessonId: string): Promise<Lesson | null> => {
+  async (
+    lessonId: string,
+    moduleId: string,
+  ): Promise<{
+    lesson: Lesson | null;
+    moduleUnpublished: boolean;
+    courseUnpublished: boolean;
+  }> => {
     try {
-      const [lesson] = await sql<Lesson[]>`
-        UPDATE lessons
-        SET
-          is_published = FALSE,
-          updated_at = CURRENT_TIMESTAMP
-        WHERE
-          id = ${lessonId}
-        RETURNING
-          id,
-          title,
-          description,
-          POSITION,
-          module_id,
-          is_published,
-          is_free,
-          video_url,
-          duration,
-          created_at,
-          updated_at
-      `;
-      if (!lesson || lesson.id === undefined) return null;
+      return await sql.begin(async (sql) => {
+        // 1. Unpublish the lesson
+        const [updatedLesson] = await sql<Lesson[]>`
+          UPDATE lessons
+          SET
+            is_published = FALSE,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE
+            id = ${lessonId}
+          RETURNING
+            *
+        `;
 
-      return {
-        ...lesson,
-        created_at: new Date(lesson.created_at),
-        updated_at: new Date(lesson.updated_at),
-      };
+        if (!updatedLesson) {
+          return {
+            lesson: null,
+            moduleUnpublished: false,
+            courseUnpublished: false,
+          };
+        }
+
+        // 2. Check if it was the last published lesson in this module
+        const [{ lessonCount }] = await sql<[{ lessonCount: number }]>`
+          SELECT
+            count(*)::int AS "lessonCount"
+          FROM
+            lessons
+          WHERE
+            module_id = ${moduleId}
+            AND is_published = TRUE
+        `;
+
+        let moduleUnpublished = false;
+        let courseUnpublished = false;
+
+        // 3. If no published lessons remain, get module info and check course
+        if (lessonCount === 0) {
+          // Get module and course info
+          const [moduleInfo] = await sql<[{ course_id: number }]>`
+            UPDATE modules
+            SET
+              is_published = FALSE,
+              updated_at = CURRENT_TIMESTAMP
+            WHERE
+              id = ${moduleId}
+            RETURNING
+              course_id
+          `;
+
+          moduleUnpublished = true;
+
+          // Check if this was the last published module in the course
+          const [{ moduleCount }] = await sql<[{ moduleCount: number }]>`
+            SELECT
+              count(*)::int AS "moduleCount"
+            FROM
+              modules
+            WHERE
+              course_id = ${moduleInfo.course_id}
+              AND is_published = TRUE
+          `;
+
+          // If no published modules remain, unpublish the course
+          if (moduleCount === 0) {
+            await sql`
+              UPDATE courses
+              SET
+                is_published = FALSE,
+                updated_at = CURRENT_TIMESTAMP
+              WHERE
+                id = ${moduleInfo.course_id}
+            `;
+            courseUnpublished = true;
+          }
+        }
+
+        return {
+          lesson: {
+            ...updatedLesson,
+            created_at: new Date(updatedLesson.created_at),
+            updated_at: new Date(updatedLesson.updated_at),
+          },
+          moduleUnpublished,
+          courseUnpublished,
+        };
+      });
     } catch (error) {
-      console.error('Database Error:', error);
+      console.error('[UNPUBLISH_LESSON]', error);
       throw new Error('Failed to unpublish lesson');
     }
   },
