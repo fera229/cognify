@@ -16,7 +16,7 @@ import {
   Undo,
   Redo,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -24,16 +24,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import dynamic from 'next/dynamic';
 
 const FontFamilyExtension = Extension.create({
   name: 'fontFamily',
-
   addOptions() {
     return {
       types: ['textStyle'],
     };
   },
-
   addGlobalAttributes() {
     return [
       {
@@ -217,7 +216,6 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         disabled={!editor.can().undo()}
       >
         <Undo className="h-4 w-4" />
-        <span className="ml-1 text-xs text-muted-foreground">Ctrl+Z</span>
       </Button>
       <Button
         type="button"
@@ -227,13 +225,14 @@ const MenuBar = ({ editor }: MenuBarProps) => {
         disabled={!editor.can().redo()}
       >
         <Redo className="h-4 w-4" />
-        <span className="ml-1 text-xs text-muted-foreground">Ctrl+Y</span>
       </Button>
     </div>
   );
 };
 
 const Editor = ({ onChange, value, disabled }: EditorProps) => {
+  const [isMounted, setIsMounted] = useState(false);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -288,23 +287,18 @@ const Editor = ({ onChange, value, disabled }: EditorProps) => {
         class:
           'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none',
       },
-      handleKeyDown: (view, event) => {
-        if (event.key === 'Tab') {
-          const { selection } = view.state;
-
-          if (event.shiftKey) {
-            view.dispatch(view.state.tr.deleteSelection());
-            editor?.chain().focus().liftListItem('listItem').run();
-          } else {
-            view.dispatch(view.state.tr.deleteSelection());
-            editor?.chain().focus().sinkListItem('listItem').run();
-          }
-          return true;
-        }
-        return false;
-      },
     },
+    // Explicitly set immediatelyRender to false (to fix dydratiopn problem)
+    immediatelyRender: false,
   });
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <div className="border rounded-md">
@@ -316,4 +310,8 @@ const Editor = ({ onChange, value, disabled }: EditorProps) => {
   );
 };
 
-export default Editor;
+// Export a dynamic component with SSR disabled (hydration problem fix)
+
+export default dynamic(() => Promise.resolve(Editor), {
+  ssr: false,
+});

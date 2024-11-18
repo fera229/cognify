@@ -14,7 +14,12 @@ export const FileUpload = ({ action, endpoint }: FileUploadProps) => {
     <UploadDropzone
       endpoint={endpoint}
       onClientUploadComplete={(res) => {
-        action(res?.[0]?.url);
+        const url = res?.[0]?.url;
+        if (url) {
+          action(url);
+        } else {
+          toast.error('Failed to upload file');
+        }
       }}
       onUploadError={(error: Error) => {
         toast.error(`${error?.message}`) ||

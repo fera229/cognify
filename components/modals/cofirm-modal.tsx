@@ -15,22 +15,33 @@ import {
 interface ConfirmModalProps {
   children: React.ReactNode;
   onConfirm: () => void;
+  title?: string;
+  description?: string;
+  confirmText?: string;
+  cancelText?: string;
 }
 
-export const ConfirmModal = ({ children, onConfirm }: ConfirmModalProps) => {
+export const ConfirmModal = ({
+  children,
+  onConfirm,
+  title = 'Are you sure?',
+  description = 'This action cannot be undone.',
+  confirmText = 'Continue',
+  cancelText = 'Cancel',
+}: ConfirmModalProps) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone.
-          </AlertDialogDescription>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>Continue</AlertDialogAction>
+          <AlertDialogCancel>{cancelText}</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>
+            {confirmText}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
