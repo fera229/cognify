@@ -1,15 +1,9 @@
 import { Suspense } from 'react';
 import { getModuleById } from '@/database/modules';
 import { getUserFromSession } from '@/database/users';
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { IconBadge } from '@/components/icon-badge';
-import {
-  ArrowLeft,
-  Book,
-  BookA,
-  LayoutDashboard,
-  ScrollText,
-} from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, ScrollText } from 'lucide-react';
 import { getCourseById } from '@/database/courses';
 import { Banner } from '@/components/banner';
 import { ClientOnly } from '@/components/providers/client-only';
@@ -79,7 +73,9 @@ async function ModuleContent({
           <div className="flex flex-col gap-y-2">
             <h1 className="text-2xl font-medium">Module Setup</h1>
             <span className="text-sm text-slate-700">
-              Complete all fields {completionText}
+              {isComplete
+                ? `All frields completed! you can publish the module now. ${completionText}`
+                : `Complete all fields ${completionText}`}
             </span>
           </div>
           {/* <ContentActions

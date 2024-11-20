@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Course, Module } from '@/util/types';
+import type { Course, Module } from '@/util/types';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { Badge } from '@/components/ui/badge';
 

@@ -61,7 +61,7 @@ const ExplorePage = ({
           <h1 className="text-2xl font-bold">Explore Courses</h1>
           <p className="text-muted-foreground">
             {currentUser
-              ? `Welcome back, ${currentUser.name}! Find your next learning adventure.`
+              ? `Welcome, ${currentUser.name}! Find your next learning adventure.`
               : 'Discover and enroll in courses to start learning'}
           </p>
         </div>

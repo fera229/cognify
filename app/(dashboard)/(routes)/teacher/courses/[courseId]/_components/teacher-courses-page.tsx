@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import type { Course } from '@/util/types';
 import { formatDistance } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface TeacherCoursesPageProps {
   courses: Course[];
@@ -76,7 +77,10 @@ const TeacherCoursesPage = ({ courses = [] }: TeacherCoursesPageProps) => {
                       {course.title}
                     </h3>
                     <Badge
-                      variant={course.is_published ? 'default' : 'secondary'}
+                      className={cn(
+                        'mr-2 bg-slate-500 ml-auto rounded-2xl',
+                        course.is_published && 'bg-sky-700',
+                      )}
                     >
                       {course.is_published ? 'Published' : 'Draft'}
                     </Badge>

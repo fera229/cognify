@@ -9,6 +9,7 @@ export async function POST(
 ) {
   try {
     const body = await request.json();
+    const paramsAwaited = await params;
 
     // Verify the session
     const validSession = await checkIfSessionIsValid();
@@ -23,7 +24,7 @@ export async function POST(
     }
 
     // Confirm the user is the instructor of the course
-    const courseId = parseInt(params.courseId, 10);
+    const courseId = parseInt(paramsAwaited.courseId, 10);
     if (isNaN(courseId)) {
       return NextResponse.json(
         { message: 'Invalid course ID' },
@@ -31,7 +32,7 @@ export async function POST(
       );
     }
 
-    const course = await getCourseById(params.courseId);
+    const course = await getCourseById(paramsAwaited.courseId);
     if (!course) {
       return NextResponse.json(
         { message: 'Course not found' },

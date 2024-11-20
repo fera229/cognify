@@ -44,7 +44,7 @@ const CourseCard = ({ course, isEnrolled }: CourseCardProps) => {
 
   return (
     <Card className="group overflow-hidden border rounded-lg hover:shadow-md transition-all">
-      <a href={`/courses/${id}`} className="block">
+      <a href={isEnrolled ? `/courses/${id}` : '/login'} className="block">
         <div className="relative aspect-video w-full">
           {image_url ? (
             <img

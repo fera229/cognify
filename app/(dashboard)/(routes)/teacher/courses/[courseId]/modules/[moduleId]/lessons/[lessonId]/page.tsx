@@ -93,7 +93,9 @@ const LessonIdPage = async ({ params }: PageProps) => {
                 <div className="flex flex-col gap-y-2">
                   <h1 className="text-2xl font-medium">Lesson Setup</h1>
                   <span className="text-sm text-slate-700">
-                    Complete all fields {completionText}
+                    {isComplete
+                      ? `All frields completed! ${completionText}`
+                      : `Complete all fields ${completionText}`}
                   </span>
                 </div>
                 {/* see comment above */}

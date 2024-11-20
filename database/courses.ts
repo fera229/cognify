@@ -1,7 +1,6 @@
 import { cache } from 'react';
 import { sql } from './connect';
 import type { Attachment, Category, Course } from '@/util/types';
-import type { CourseFormData } from '@/util/validation';
 import type { CourseFromDB } from '@/util/types';
 
 export const getPublicCourses = cache(async (): Promise<Course[]> => {

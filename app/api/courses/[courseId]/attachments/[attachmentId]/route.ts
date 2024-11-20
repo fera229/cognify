@@ -1,4 +1,3 @@
-// app/api/courses/[courseId]/attachments/[attachmentId]/route.ts
 import { deleteAttachment, getCourseById } from '@/database/courses';
 import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';
 import { error } from 'console';
@@ -35,7 +34,7 @@ export async function DELETE(
       );
     }
 
-    const course = await getCourseById(params.courseId);
+    const course = await getCourseById(paramsAwaited.courseId);
     if (!course) {
       return NextResponse.json(
         { message: 'Course not found' },
