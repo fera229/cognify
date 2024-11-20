@@ -6,7 +6,7 @@ import { Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ConfirmModal } from '@/components/modals/cofirm-modal';
 import toast from 'react-hot-toast';
-
+import confetti from 'canvas-confetti';
 interface CourseActionsProps {
   courseId: string;
   isPublished: boolean;
@@ -62,7 +62,19 @@ export function CourseActions({
         const error = await response.json();
         throw new Error(error.message);
       }
-
+      {
+        !isPublished &&
+          confetti({
+            particleCount: 200,
+            spread: 160,
+            origin: { y: 0.6 },
+            colors: ['#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa', '#93c5fd'],
+            ticks: 200,
+            gravity: 1.2,
+            decay: 0.94,
+            startVelocity: 30,
+          });
+      }
       toast.success(isPublished ? 'Course unpublished' : 'Course published');
 
       router.refresh();
