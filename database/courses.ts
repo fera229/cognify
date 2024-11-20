@@ -1,6 +1,12 @@
 import { cache } from 'react';
 import { sql } from './connect';
-import type { Attachment, Category, Course } from '@/util/types';
+import type {
+  Attachment,
+  Category,
+  Course,
+  CourseDetails,
+  CourseDetailsRow,
+} from '@/util/types';
 import type { CourseFromDB } from '@/util/types';
 
 export const getPublicCourses = cache(async (): Promise<Course[]> => {
@@ -249,6 +255,85 @@ export const getCourseById = cache(
     } catch (error) {
       console.error('Database Error:', error);
       throw new Error('Failed to fetch course');
+    }
+  },
+);
+
+export const getCourseDetails = cache(
+  async (
+    courseId: string | number,
+    userId: string | number,
+  ): Promise<CourseDetails[]> => {
+    try {
+      // Convert parameters to numbers and validate
+      const parsedCourseId = Number(courseId);
+      const parsedUserId = Number(userId);
+
+      if (isNaN(parsedCourseId) || isNaN(parsedUserId)) {
+        throw new Error('Invalid course ID or user ID');
+      }
+
+      const courseDetails = await sql<CourseDetailsRow[]>`
+        SELECT
+          c.id,
+          c.title,
+          c.description,
+          c.image_url,
+          c.price,
+          c.instructor_id,
+          c.is_published,
+          c.category_id,
+          c.created_at,
+          c.updated_at,
+          m.id AS module_id,
+          m.title AS module_title,
+          m.description AS module_description,
+          m.position AS module_position,
+          m.is_published AS module_is_published,
+          m.created_at AS module_created_at,
+          m.updated_at AS module_updated_at,
+          l.id AS lesson_id,
+          l.title AS lesson_title,
+          l.description AS lesson_description,
+          l.position AS lesson_position,
+          l.is_published AS lesson_is_published,
+          l.created_at AS lesson_created_at,
+          l.updated_at AS lesson_updated_at,
+          up.id AS user_progress_id,
+          coalesce(up.is_completed, FALSE) AS user_progress_is_completed
+        FROM
+          courses c
+          LEFT JOIN modules m ON c.id = m.course_id
+          LEFT JOIN lessons l ON m.id = l.module_id
+          LEFT JOIN user_progress up ON l.id = up.lesson_id
+          AND up.user_id = ${parsedUserId}
+        WHERE
+          c.id = ${parsedCourseId}
+        ORDER BY
+          coalesce(m.position, 0) ASC,
+          coalesce(l.position, 0) ASC
+      `;
+
+      return courseDetails.map((details) => ({
+        ...details,
+        created_at: new Date(details.created_at),
+        updated_at: new Date(details.updated_at),
+        module_created_at: details.module_created_at
+          ? new Date(details.module_created_at)
+          : null,
+        module_updated_at: details.module_updated_at
+          ? new Date(details.module_updated_at)
+          : null,
+        lesson_created_at: details.lesson_created_at
+          ? new Date(details.lesson_created_at)
+          : null,
+        lesson_updated_at: details.lesson_updated_at
+          ? new Date(details.lesson_updated_at)
+          : null,
+      }));
+    } catch (error) {
+      console.error('Database Error:', error);
+      throw new Error('Failed to fetch course details');
     }
   },
 );
