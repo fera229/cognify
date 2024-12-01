@@ -135,9 +135,14 @@ function DescriptionForm({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Editor
+                    {/* <Editor
                       onChange={field.onChange}
                       value={field.value}
+                      disabled={isSubmitting}
+                    /> */}
+                    <textarea
+                      {...field}
+                      className="w-full p-3 border rounded-md"
                       disabled={isSubmitting}
                     />
                   </FormControl>

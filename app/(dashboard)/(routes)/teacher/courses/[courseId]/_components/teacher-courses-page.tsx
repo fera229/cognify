@@ -33,9 +33,11 @@ const TeacherCoursesPage = ({ courses = [] }: TeacherCoursesPageProps) => {
             Manage and track your course content
           </p>
         </div>
-        <Link href="/teacher/create">
-          <Button>Create New Course</Button>
-        </Link>
+        {courses.length !== 0 && (
+          <Link href="/teacher/create">
+            <Button>Create New Course</Button>
+          </Link>
+        )}
       </div>
 
       <div className="space-y-4">

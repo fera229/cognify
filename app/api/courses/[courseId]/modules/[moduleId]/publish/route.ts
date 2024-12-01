@@ -1,19 +1,16 @@
-import { NextResponse } from 'next/server';
-import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';
 import { getCourseById } from '@/database/courses';
-import { unpublishLesson } from '@/database/lessons';
+import { publishModule } from '@/database/modules';
+import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';
+import { NextResponse } from 'next/server';
+import toast from 'react-hot-toast';
 
 export async function PATCH(
   req: Request,
-  {
-    params,
-  }: {
-    params: { courseId: string; moduleId: string; lessonId: string };
-  },
+  { params }: { params: { courseId: string; moduleId: string } },
 ) {
   try {
     const paramsAwaited = await params;
-
+    // Auth checks
     const validSession = await checkIfSessionIsValid();
     if (!validSession) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -24,6 +21,7 @@ export async function PATCH(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
+    // Course ownership check
     const course = await getCourseById(paramsAwaited.courseId);
     if (!course) {
       return NextResponse.json(
@@ -33,24 +31,16 @@ export async function PATCH(
     }
 
     if (course.instructor_id !== user.id) {
+      toast.error('Unauthorized');
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-
-    const result = await unpublishLesson(
-      paramsAwaited.lessonId,
-      paramsAwaited.moduleId,
-    );
-
-    if (!result.lesson) {
-      return NextResponse.json(
-        { message: 'Failed to unpublish lesson' },
-        { status: 400 },
-      );
-    }
-
-    return NextResponse.json(result);
+    // publish module
+    const module = await publishModule(paramsAwaited.moduleId);
+    return NextResponse.json(module);
   } catch (error) {
-    console.error('[LESSON_UNPUBLISH]', error);
+    if (error instanceof Error) {
+      return NextResponse.json({ message: error.message }, { status: 400 });
+    }
     return NextResponse.json({ message: 'Internal Error' }, { status: 500 });
   }
 }

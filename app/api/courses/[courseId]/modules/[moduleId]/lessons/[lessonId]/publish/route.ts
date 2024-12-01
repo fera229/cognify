@@ -22,9 +22,10 @@ export async function PATCH(req: Request, { params }: { params: Params }) {
     if (!user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
+    const paramsAwaited = await params;
 
     // Course ownership check
-    const course = await getCourseById(params.courseId);
+    const course = await getCourseById(paramsAwaited.courseId);
     if (!course) {
       return NextResponse.json(
         { message: 'Course not found' },
@@ -46,16 +47,16 @@ export async function PATCH(req: Request, { params }: { params: Params }) {
           FROM
             lessons
           WHERE
-            id = ${params.lessonId}
-            AND module_id = ${params.moduleId}
+            id = ${paramsAwaited.lessonId}
+            AND module_id = ${paramsAwaited.moduleId}
         )
       UPDATE lessons
       SET
         is_published = NOT is_published,
         updated_at = CURRENT_TIMESTAMP
       WHERE
-        id = ${params.lessonId}
-        AND module_id = ${params.moduleId}
+        id = ${paramsAwaited.lessonId}
+        AND module_id = ${paramsAwaited.moduleId}
       RETURNING
         id,
         title,
@@ -84,7 +85,7 @@ export async function PATCH(req: Request, { params }: { params: Params }) {
     }
 
     console.log('Lesson update:', {
-      lessonId: params.lessonId,
+      lessonId: paramsAwaited.lessonId,
       previousState: updatedLesson.previous_state,
       newState: updatedLesson.is_published,
     });

@@ -9,16 +9,9 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form';
 
-import { Category } from '@/util/types';
+import type { Category } from '@/util/types';
 import { Combobox } from '@/components/ui/combobox';
 
 export interface CategoryFormProps {
