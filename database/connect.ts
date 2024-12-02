@@ -1,4 +1,4 @@
-import 'server-only';
+// import 'server-only';
 import postgres from 'postgres';
 import type { Sql } from 'postgres';
 
