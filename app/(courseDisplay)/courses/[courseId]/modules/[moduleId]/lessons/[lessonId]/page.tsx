@@ -6,8 +6,7 @@ import { getModuleById } from '@/database/modules';
 import { getLessonById } from '@/database/lessons';
 import LessonContent from './_components/lesson-content';
 import AILessonAssistant from './_components/ai-lesson-assistant';
-import { sql } from '@/database/connect';
-import type { TranscriptSegment } from '@/util/types';
+import { hasAccessToCourse } from '@/database/enrollments';
 
 interface LessonPageProps {
   params: {
@@ -17,36 +16,15 @@ interface LessonPageProps {
   };
 }
 
-async function getLessonTranscripts(
-  lessonId: string,
-): Promise<TranscriptSegment[]> {
-  try {
-    const [result] = await sql<{ transcript_segments: TranscriptSegment[] }[]>`
-      SELECT
-        transcript_segments
-      FROM
-        video_transcripts
-      WHERE
-        lesson_id = ${lessonId}
-    `;
-    return result?.transcript_segments || [];
-  } catch (error) {
-    console.error('Error fetching transcripts:', error);
-    return [];
-  }
-}
-
 async function LessonPageContent({ params }: LessonPageProps) {
   try {
     const paramsAwaited = await params;
 
-    // Fetch all required data including transcripts
-    const [user, course, module, lesson, transcripts] = await Promise.all([
+    const [user, course, module, lesson] = await Promise.all([
       getUserFromSession(),
       getCourseById(paramsAwaited.courseId),
       getModuleById(paramsAwaited.moduleId),
       getLessonById(paramsAwaited.lessonId),
-      getLessonTranscripts(paramsAwaited.lessonId),
     ]);
 
     if (!user) {
@@ -59,19 +37,23 @@ async function LessonPageContent({ params }: LessonPageProps) {
 
     const isInstructor = course.instructor_id === user.id;
 
-    // Verify relationships
+    // Check course access if not instructor
+    let hasAccess = isInstructor;
+    if (!isInstructor) {
+      hasAccess = await hasAccessToCourse(
+        user.id,
+        Number(paramsAwaited.courseId),
+      );
+    }
+
+    // Determine if user can access this specific lesson
+    const canAccessLesson = isInstructor || lesson.is_free || hasAccess;
+
     if (
       module.course_id !== Number(paramsAwaited.courseId) ||
       lesson.module_id !== Number(paramsAwaited.moduleId)
     ) {
       return redirect(`/courses/${paramsAwaited.courseId}`);
-    }
-
-    // Check access for non-instructors
-    if (!isInstructor && !lesson.is_free && !module.is_published) {
-      return redirect(
-        `/courses/${paramsAwaited.courseId}/modules/${paramsAwaited.moduleId}`,
-      );
     }
 
     return (
@@ -82,6 +64,8 @@ async function LessonPageContent({ params }: LessonPageProps) {
           course={course}
           user={user}
           isInstructor={isInstructor}
+          hasAccess={hasAccess}
+          canAccessLesson={canAccessLesson}
         />
         <div>
           <AILessonAssistant />

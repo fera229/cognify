@@ -1,35 +1,14 @@
 import { Suspense } from 'react';
-import { getCategories, getPublicCourses } from '@/database/courses';
+import { getPublicCourses } from '@/database/courses';
 import { Loader2 } from 'lucide-react';
-import ExplorePage from '@/components/explore-page';
-import { getUserFromSession } from '@/database/users';
+import HomePage from '../_components/home-page';
 
-async function ExplorePageContent() {
-  const user = await getUserFromSession();
-  const [coursesData, categoriesData] = await Promise.all([
-    getPublicCourses(),
-    getCategories(),
-  ]);
-
-  return (
-    <ExplorePage
-      courses={coursesData}
-      categories={categoriesData}
-      currentUser={
-        user
-          ? {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              role: user.role,
-            }
-          : null
-      }
-    />
-  );
+async function HomePageContent() {
+  const courses = await getPublicCourses();
+  return <HomePage courses={courses} />;
 }
 
-export default function HomePage() {
+export default function Page() {
   return (
     <Suspense
       fallback={
@@ -38,7 +17,7 @@ export default function HomePage() {
         </div>
       }
     >
-      <ExplorePageContent />
+      <HomePageContent />
     </Suspense>
   );
 }
