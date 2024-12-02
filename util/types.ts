@@ -73,6 +73,7 @@ export type CourseFromDB = {
     updated_at: string;
   }> | null;
 };
+
 export type VideoUploadResponse = {
   asset_id: string;
   playback_id: string;
@@ -125,4 +126,65 @@ export type Session = {
   id: number;
   token: string;
   userId: number;
+};
+
+export type CourseDetailsRow = {
+  // Course fields
+  id: number;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  price: number | null;
+  instructor_id: number;
+  is_published: boolean;
+  category_id: number | null;
+  created_at: string;
+  updated_at: string;
+
+  // Module fields
+  module_id: number | null;
+  module_title: string | null;
+  module_description: string | null;
+  module_position: number | null;
+  module_is_published: boolean | null;
+  module_created_at: string | null;
+  module_updated_at: string | null;
+
+  // Lesson fields
+  lesson_id: number | null;
+  lesson_title: string | null;
+  lesson_description: string | null;
+  lesson_position: number | null;
+  lesson_is_published: boolean | null;
+  lesson_video_url: string | null;
+  lesson_duration: number | null;
+  lesson_created_at: string | null;
+  lesson_updated_at: string | null;
+
+  // User progress fields
+  user_progress_id: number | null;
+  user_progress_is_completed: boolean | null;
+};
+
+export type CourseDetails = Omit<
+  CourseDetailsRow,
+  | 'created_at'
+  | 'updated_at'
+  | 'module_created_at'
+  | 'module_updated_at'
+  | 'lesson_created_at'
+  | 'lesson_updated_at'
+> & {
+  created_at: Date;
+  updated_at: Date;
+  module_created_at: Date | null;
+  module_updated_at: Date | null;
+  lesson_created_at: Date | null;
+  lesson_updated_at: Date | null;
+};
+
+export type CourseProgress = {
+  totalLessons: number;
+  completedLessons: number;
+  percentageComplete: number;
 };
