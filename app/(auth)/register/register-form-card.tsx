@@ -215,7 +215,11 @@ export default function RegisterFormCard(searchParams: SearchParams) {
               )}
             </div>
 
-            <Button type="submit" disabled={isLoading} className="w-full mt-8">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full mt-8 hover:cursor-pointer"
+            >
               {isLoading ? 'Registering...' : 'Register'}
             </Button>
           </form>
