@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Logo } from './logo';
 import { SidebarRoutes } from './sidebar-routes';
+import { Button } from '@/components/ui/button';
 
 export const Sidebar = () => {
   return (

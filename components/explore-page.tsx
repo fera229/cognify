@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { Loader2, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import CourseCard from '@/components/course-card';
-import type { Course, Category } from '@/util/types';
+import type { Course, Category, CourseProgress } from '@/util/types';
 
 interface User {
   id: number;
@@ -24,17 +24,23 @@ interface ExplorePageProps {
   courses: Course[];
   categories: Category[];
   currentUser: User | null;
+  coursesProgress?: Map<number, CourseProgress>;
+  coursesAccess: Map<number, boolean | undefined>;
 }
+
+// TODO: // Create a better implementation with Debounced Server-Side Search
 
 const ExplorePage = ({
   courses: initialCourses,
   categories,
   currentUser,
+  coursesAccess,
 }: ExplorePageProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'recent' | 'popular'>('recent');
 
+  // Client-side filtering - No DB query but might be memory-intensive (especially if we have a lot of courses to render).
   const filteredCourses = initialCourses
     .filter((course) => {
       const matchesSearch =
@@ -45,10 +51,11 @@ const ExplorePage = ({
         course.category_id?.toString() === selectedCategory;
       return matchesSearch && matchesCategory;
     })
-    .sort((a, b) => {
+    .sort((CourseA, CourseB) => {
       if (sortBy === 'recent') {
         return (
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          new Date(CourseB.created_at).getTime() -
+          new Date(CourseA.created_at).getTime()
         );
       }
       return 0;
@@ -56,9 +63,9 @@ const ExplorePage = ({
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex flex-col gap-y-4 md:flex-row md:items-center md:justify-between mb-8">
+      <div className="flex flex-col gap-y-4 md:flex-row md:items-center md:justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold">Explore Courses</h1>
+          <h1 className="text-2xl font-bold mb-2">Explore Courses</h1>
           <p className="text-muted-foreground">
             {currentUser
               ? `Welcome, ${currentUser.name}! Find your next learning adventure.`
@@ -120,10 +127,9 @@ const ExplorePage = ({
             <CourseCard
               key={course.id}
               course={course}
-              isEnrolled={
-                currentUser?.role === 'Instructor' ||
-                currentUser?.id === course.instructor_id
-              }
+              categories={categories}
+              isEnrolled={coursesAccess.get(course.id) || false}
+              hasAccess={coursesAccess.get(course.id) || false}
             />
           ))}
         </div>

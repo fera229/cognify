@@ -1,3 +1,5 @@
+'use client';
+
 import type { User } from '@/database/users';
 import {
   DropdownMenu,
