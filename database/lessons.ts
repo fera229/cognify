@@ -1,30 +1,38 @@
 import { cache } from 'react';
 import { sql } from './connect';
-import { Lesson } from '@/util/types';
+import type { Lesson, TranscriptSegment } from '@/util/types';
 
 export const getLessonById = cache(
   async (lessonId: string): Promise<Lesson | null> => {
     try {
-      const [lesson] = await sql<Lesson[]>`
+      const [lesson] = await sql<
+        (Lesson & {
+          transcripts?: {
+            transcript_segments: TranscriptSegment[];
+          }[];
+        })[]
+      >`
         SELECT
-          id,
-          title,
-          description,
-          POSITION,
-          module_id,
-          is_published,
-          is_free,
-          video_url,
-          duration,
-          created_at,
-          updated_at
+          l.*,
+          json_agg(
+            json_build_object(
+              'transcript_segments',
+              vt.transcript_segments
+            )
+          ) FILTER (
+            WHERE
+              vt.id IS NOT NULL
+          ) AS transcripts
         FROM
-          lessons
+          lessons l
+          LEFT JOIN video_transcripts vt ON vt.lesson_id = l.id
         WHERE
-          id = ${lessonId}
+          l.id = ${lessonId}
+        GROUP BY
+          l.id
       `;
 
-      if (!lesson || lesson.id === undefined) return null;
+      if (!lesson) return null;
 
       return {
         ...lesson,

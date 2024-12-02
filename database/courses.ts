@@ -297,6 +297,8 @@ export const getCourseDetails = cache(
           l.description AS lesson_description,
           l.position AS lesson_position,
           l.is_published AS lesson_is_published,
+          l.video_url AS lesson_video_url,
+          l.duration AS lesson_duration,
           l.created_at AS lesson_created_at,
           l.updated_at AS lesson_updated_at,
           up.id AS user_progress_id,

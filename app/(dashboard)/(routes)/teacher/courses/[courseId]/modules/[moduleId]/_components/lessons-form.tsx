@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Lesson, Module } from '@/util/types';
+import type { Lesson, Module } from '@/util/types';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -258,9 +258,9 @@ export default function LessonsForm({
                           </div>
                           <div className="flex-1">
                             <div className="font-medium">{lesson.title}</div>
-                            <div className="text-xs">
+                            {/* <div className="text-xs">
                               {lesson.description || 'No description'}
-                            </div>
+                            </div> */}
                           </div>
                           <div className="pr-2 flex items-center gap-x-2">
                             {lesson.is_free && <Badge>Free</Badge>}

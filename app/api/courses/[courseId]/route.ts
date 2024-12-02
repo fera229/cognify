@@ -115,3 +115,45 @@ export async function PATCH(
     );
   }
 }
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { courseId: string } },
+) {
+  try {
+    const paramsAwaited = await params;
+
+    const validSession = await checkIfSessionIsValid();
+    if (!validSession) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const user = await getUserFromSession();
+    if (!user) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+
+    const course = await getCourseById(paramsAwaited.courseId);
+    if (!course) {
+      return NextResponse.json(
+        { message: 'Course not found' },
+        { status: 404 },
+      );
+    }
+
+    if (course.instructor_id !== user.id) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    await sql`
+      DELETE FROM courses
+      WHERE
+        id = ${paramsAwaited.courseId}
+    `;
+
+    return NextResponse.json({ message: 'Course deleted' });
+  } catch (error) {
+    console.error('[COURSE_DELETE]', error);
+    return NextResponse.json({ message: 'Internal Error' }, { status: 500 });
+  }
+}

@@ -1,16 +1,15 @@
-//app/(dashboard)/(routes)/teacher/courses/page.tsx
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import React from 'react';
+import { getTeacherCourses } from '@/database/courses';
+import { getUserFromSession } from '@/database/users';
+import { redirect } from 'next/navigation';
+import TeacherCoursesPage from './[courseId]/_components/teacher-courses-page';
 
-function CoursesPage() {
-  return (
-    <div className="p-4">
-      <Link href={'/teacher/create'}>
-        <Button>New Course</Button>
-      </Link>
-    </div>
-  );
+export default async function CoursesPage() {
+  const user = await getUserFromSession();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  const courses = await getTeacherCourses(user.id);
+  return <TeacherCoursesPage courses={courses} />;
 }
-
-export default CoursesPage;

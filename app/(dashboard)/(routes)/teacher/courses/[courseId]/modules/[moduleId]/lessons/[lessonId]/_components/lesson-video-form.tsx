@@ -6,7 +6,7 @@ import * as z from 'zod';
 import { FileUpload } from '@/components/uploadFile';
 import { Pencil, PlusCircle, Video, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Lesson, MuxData } from '@/util/types';
+import type { Lesson } from '@/util/types';
 import toast from 'react-hot-toast';
 import MuxPlayer from '@mux/mux-player-react';
 import { Progress } from '@/components/ui/progress';
@@ -20,7 +20,6 @@ interface LessonVideoFormProps {
 
 const videoSchema = z.object({
   video_url: z.string().url('Invalid video URL'),
-  asset_id: z.string(),
   playback_id: z.string(),
   duration: z.number().min(0),
 });
@@ -46,8 +45,6 @@ export const LessonVideoForm = ({
       try {
         setIsUploading(true);
 
-        console.log('Submitting video data:', values);
-
         const response = await fetch(
           `/api/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
           {
@@ -56,33 +53,20 @@ export const LessonVideoForm = ({
             body: JSON.stringify({
               video_url: values.playback_id,
               duration: values.duration,
-              muxData: {
-                asset_id: values.asset_id,
-                playback_id: values.playback_id,
-              },
             }),
           },
         );
 
         if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Submission error:', errorData);
-          throw new Error(errorData.message || 'Failed to update lesson video');
+          throw new Error('Failed to update lesson');
         }
-
-        const responseData = await response.json();
-        console.log('Submission successful:', responseData);
 
         toast.success('Video uploaded successfully');
         toggleEdit();
         router.refresh();
       } catch (error) {
-        console.error('Submission error:', error);
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : 'Something went wrong uploading the video',
-        );
+        toast.error('Something went wrong');
+        console.error(error);
       } finally {
         setIsUploading(false);
         setUploadProgress(0);
@@ -98,70 +82,54 @@ export const LessonVideoForm = ({
         return;
       }
 
-      console.log('Starting video upload with URL:', url);
-      console.log('Lesson ID:', lessonId);
-
-      // Simulate progress while processing
-      const simulateProgress = () => {
-        setUploadProgress((prev) => {
-          if (prev >= 95) {
-            clearInterval(progressInterval);
-            return prev;
-          }
-          return prev + 5;
-        });
-      };
-      const progressInterval = setInterval(simulateProgress, 500);
-
-      // Process the video upload
       try {
-        const muxResponse = await fetch('/api/mux', {
+        setUploadProgress(25);
+
+        const response = await fetch('/api/mux', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            lessonId,
             videoUrl: url,
+            lessonId,
           }),
         });
 
-        if (!muxResponse.ok) {
-          const errorData = await muxResponse.json();
-          console.error('Mux API Error:', errorData);
-          throw new Error(errorData.message || 'Failed to process video');
+        setUploadProgress(50);
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to process video');
         }
 
-        const data: MuxData = await muxResponse.json();
-        console.log('Mux processing successful:', data);
-        setUploadProgress(100);
+        const data = await response.json();
+        setUploadProgress(75);
 
-        // Ensure we have the required data before submitting
-        if (!data.asset_id || !data.playback_id) {
+        // Check the structure of the response based on our updated Mux route
+        if (!data.asset?.playbackId || !data.asset?.id) {
           throw new Error('Missing required data from Mux response');
         }
 
         await onSubmit({
           video_url: url,
-          asset_id: data.asset_id,
-          playback_id: data.playback_id,
-          duration: initialData.duration || 0,
+          playback_id: data.asset.playbackId,
+          duration: data.asset.duration || 0,
         });
+
+        setUploadProgress(100);
       } catch (error) {
-        console.error('Video processing error:', error);
+        console.error('Video upload error:', error);
         toast.error(
-          error instanceof Error ? error.message : 'Error processing video',
+          error instanceof Error ? error.message : 'Error uploading video',
         );
-        setUploadProgress(0);
-      } finally {
-        clearInterval(progressInterval);
       }
     },
-    [onSubmit, lessonId, initialData.duration],
+    [lessonId, onSubmit],
   );
 
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Course video
+        Lesson video
         <Button onClick={toggleEdit} variant="ghost" disabled={isUploading}>
           {isEditing ? (
             <>Cancel</>
@@ -170,7 +138,7 @@ export const LessonVideoForm = ({
               {initialData.video_url ? (
                 <>
                   <Pencil className="h-4 w-4 mr-2" />
-                  Edit video
+                  Change video
                 </>
               ) : (
                 <>
@@ -213,19 +181,17 @@ export const LessonVideoForm = ({
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <p className="text-sm text-slate-500">
                   {uploadProgress === 100
-                    ? 'Processing video...'
-                    : `Uploading: ${uploadProgress}%`}
+                    ? 'Finalizing...'
+                    : `Processing: ${uploadProgress}%`}
                 </p>
               </div>
             </div>
           )}
-          <div className="text-xs text-slate-500 mt-4">
-            Upload your lesson video. Videos are processed for optimal playback.
+          <div className="text-xs text-muted-foreground mt-4">
+            Upload your lesson video
           </div>
         </div>
       )}
     </div>
   );
 };
-
-export default LessonVideoForm;
