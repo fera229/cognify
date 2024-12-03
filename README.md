@@ -1,30 +1,131 @@
-# Cognify
+# Cognify - Modern Learning Management System
 
-## Description
+## About Cognify
 
-Cognify is a web-based Learning Management System that allows instructors to create and manage courses, modules, and lessons, while enabling students to enroll, track their progress, and interact with course content.
+Cognify reimagines online education by providing a modern, intuitive platform where instructors can create and monetize courses while students enjoy an AI-enhanced learning experience. Built with Next.js 15, TypeScript and PostgreSQL.
 
-The app includes a custom session-based authentication system, ensuring secure login and user management. It provides an intuitive user interface for both instructors and students, with role-based access control.
+## Key Features
 
-### Core Features
+Cognify delivers a comprehensive learning management solution with:
 
-- **User Authentication**: Custom session-based authentication for secure access.
-- **Course Management**: Instructors can create, update, and delete courses.
-- **Module and Lesson Management**: Organize course content into modules and lessons.
-- **Student Enrollment**: Students can enroll in courses and track their progress.
-- **Progress Tracking**: Track student progress through courses and lessons.
+- Advanced course creation and management system with drag-and-drop organization
+- Interactive video lessons with automatic transcription powered by Mux
+- AI-powered learning assistance using Mistral AI
+- Secure payment processing through Stripe integration
+- Real-time progress tracking and analytics
+- Custom session-based authentication system
+- Responsive, modern UI built with shadcn/ui components
 
-### Stretch Features (Planned)
+## Technology Stack
 
-- **Assignments and Submissions**: Instructors can assign tasks; students can submit their work.
-- **Quizzes**: Implement quiz functionality for knowledge testing.
-- **Discussion Forum**: Enable discussions within courses for peer interaction.
+### Frontend
 
-### Tech Stack
+- **Next.js 15** with App Router for server-side rendering and routing
+- **React 19** with TypeScript for type-safe component development
+- **Tailwind CSS** with shadcn/ui for consistent, responsive design
+- **React Hook Form** with Zod for robust form validation
 
-- **Next.js**: React-based framework for building web applications.
-- **Tailwind CSS (Chadcn/ui)**: Utility-first CSS framework with a component library.
-- **TypeScript**: Typed superset of JavaScript for building scalable applications.
-- **PostgreSQL**: Relational database for storing and managing data.
+### Backend
 
-Cognify is designed to be a scalable platform for managing educational content, with a focus on simplicity, flexibility, and ease of use.
+- **PostgreSQL** database with type-safe queries
+- **Custom authentication** system with secure session management
+- **RESTful API** endpoints for efficient data handling
+
+### Third-Party Integrations
+
+- **Mux** for video processing and streaming
+- **Stripe** for secure payment processing
+- **Mistral AI** for intelligent learning assistance
+- **UploadThing** for file management
+
+## Getting Started
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/cognify.git
+
+# Install dependencies
+pnpm install
+
+# Set up environment variables
+cp .env.example .env
+
+# Run database migrations
+pnpm migrate
+
+# Start development server
+pnpm dev
+```
+
+## Architecture Overview
+
+Cognify implements a modern, modular architecture:
+
+- Server-side rendering for optimal performance
+- Type-safe database queries and API endpoints
+- Secure session-based authentication
+- Real-time data updates
+- Responsive, mobile-first design
+
+## Project Structure
+
+```
+/app                 # Next.js app directory
+  /(auth)           # Authentication routes
+  /(courseDisplay)  # Course viewing components
+  /(dashboard)      # User dashboard
+/components         # Reusable UI components
+/database           # Database operations
+/migrations         # Database migrations
+/util               # Utility functions
+```
+
+## Environment Setup
+
+### Required environment variables:
+
+#### DB
+
+```
+PGHOST=localhost
+PGDATABASE=xxxxxxxxxxx
+PGUSERNAME=xxxxxxxxxxx
+PGPASSWORD=xxxxxxxxxxx
+```
+
+#### UploadThing:
+
+```
+UPLOADTHING_TOKEN=XXXXXXXXXXXXXXXX
+```
+
+#### Mux
+
+```
+MUX_TOKEN_ID=XXXXXXXXXXXXXXXX
+MUX_TOKEN_SECRET=XXXXXXXXXXXXXXXX
+```
+
+#### Mistral api
+
+```
+MISTRAL_API_KEY=XXXXXXXXXXXXXXXX
+```
+
+#### Stripe
+
+```
+STRIPE_PUBLISHABLE_KEY=XXXXXXXXXXXXXXXX
+STRIPE_SECRET_KEY=XXXXXXXXXXXXXXXX
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contact
+
+For questions or collaboration opportunities, reach out at [https://www.linkedin.com/in/feras-nasr-0999a633b/]
+
+Built with ❤️ using Next.js, TypeScript, and PostgreSQL
