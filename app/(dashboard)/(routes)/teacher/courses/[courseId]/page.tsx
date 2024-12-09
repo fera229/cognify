@@ -40,11 +40,10 @@ export default async function CourseEditPage({ params }: PageProps) {
     const courseId = paramsAwaited.courseId;
     const user = await getUserFromSession();
 
-    const [course, categories, attachments, modules] = await Promise.all([
+    const [course, categories, attachments] = await Promise.all([
       getCourseById(courseId),
       getCategories(),
       getCourseAttachments(courseId),
-      getCourseModules(courseId),
     ]);
     // const actionData = await getActionData({
     //   courseId: paramsAwaited.courseId,

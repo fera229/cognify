@@ -184,6 +184,7 @@ const LessonIdPage = async ({ params }: PageProps) => {
       </>
     );
   } catch (error) {
+    console.log('error: ', error);
     redirect('/');
   }
 };

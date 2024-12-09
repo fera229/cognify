@@ -138,7 +138,10 @@ export const getUserFromSession = cache(async (): Promise<User | null> => {
 
     return user || null;
   } catch (error) {
-    console.error('Error in getUserFromSession:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Session check during prerender, returning null');
+      console.error('Error in getUserFromSession:', error);
+    }
     return null;
   }
 });

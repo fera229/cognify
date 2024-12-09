@@ -11,15 +11,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { usePathname, useRouter } from 'next/navigation';
-import {
-  ChevronDown,
-  Gauge,
-  Layout,
-  LogOut,
-  User as UserIcon,
-} from 'lucide-react';
+import { ChevronDown, Gauge, Layout, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import LogoutButton from '@/app/(auth)/logout/LogoutButton';
+import ProfileButton from './profile-button';
 
 interface UserNavMenuProps {
   user: User;
@@ -51,7 +46,7 @@ const UserNavMenu = ({ user }: UserNavMenuProps) => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {user.role === 'Instructor' && (
-          <>
+          <div className="h-full">
             <DropdownMenuItem asChild>
               <Link
                 href={isTeacherPage ? '/' : '/teacher/courses'}
@@ -71,10 +66,17 @@ const UserNavMenu = ({ user }: UserNavMenuProps) => {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-          </>
+          </div>
         )}
         <DropdownMenuItem asChild>
-          <LogoutButton />
+          <div className="w-full">
+            <ProfileButton name={user.name} />
+          </div>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <div className="w-full">
+            <LogoutButton />
+          </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

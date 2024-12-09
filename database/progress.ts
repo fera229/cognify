@@ -14,8 +14,8 @@ export const getCourseProgress = cache(
       const [progress] = await sql<
         [
           {
-            completed_lessons: number;
-            total_lessons: number;
+            completed_lessons: BigInt;
+            total_lessons: BigInt;
           },
         ]
       >`
@@ -52,16 +52,15 @@ export const getCourseProgress = cache(
           completed_lessons cl;
       `;
 
-      if (!progress || progress.total_lessons === 0) {
+      if (!progress || Number(progress.total_lessons) === 0) {
         return null;
       }
-
+      const completedLessons = Number(progress.completed_lessons);
+      const totalLessons = Number(progress.total_lessons);
       return {
-        completedLessons: progress.completed_lessons,
-        totalLessons: progress.total_lessons,
-        percentageComplete: Math.round(
-          (progress.completed_lessons / progress.total_lessons) * 100,
-        ),
+        completedLessons,
+        totalLessons,
+        percentageComplete: Math.round((completedLessons / totalLessons) * 100),
       };
     } catch (error) {
       console.error('[GET_COURSE_PROGRESS]', error);

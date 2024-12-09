@@ -3,18 +3,6 @@ const prettierConfig = {
   plugins: ['prettier-plugin-embed', 'prettier-plugin-sql'],
   singleQuote: true,
   trailingComma: 'all',
-  printWidth: 80, // Add the printWidth option here
-  semi: true,
-  tabWidth: 2,
-  jsxBracketSameLine: false,
-  overrides: [
-    {
-      files: '*.svg',
-      options: {
-        parser: 'html',
-      },
-    },
-  ],
 };
 
 /** @type {import('prettier-plugin-embed').PrettierPluginEmbedOptions} */
