@@ -22,6 +22,7 @@ import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { User } from '@/database/users';
 import type { Course, Category, CourseProgress } from '@/util/types';
+import { IconBadge } from '@/components/icon-badge';
 
 interface ProfilePageProps {
   user: User;
@@ -176,27 +177,27 @@ export default function ProfilePage({
       </Card>
 
       {user.role === 'Instructor' && (
-        <Alert>
-          <LayoutDashboard className="h-4 w-4" />
-          <AlertTitle>You are an instructor</AlertTitle>
-          <AlertDescription className="flex items-center justify-between">
-            <span>
+        <Alert className="flex justify-center items-center">
+          <LayoutDashboard className="h-6 w-6 " />
+          <div className="">
+            <AlertTitle className="ml-2">You are an instructor</AlertTitle>
+            <AlertDescription className="ml-2">
               Create and manage your courses in the teacher dashboard.
-            </span>
-            <Button
-              variant="default"
-              onClick={() => router.push('/teacher/courses')}
-              className="ml-4"
-            >
-              Go to Teacher Dashboard
-            </Button>
-          </AlertDescription>
+            </AlertDescription>
+          </div>
+          <Button
+            variant="default"
+            onClick={() => router.push('/teacher/courses')}
+            className="ml-auto"
+          >
+            Go to Teacher Dashboard
+          </Button>
         </Alert>
       )}
 
       <div>
         <div className="flex items-center gap-2 mb-6">
-          <BookOpen className="h-5 w-5" />
+          <IconBadge icon={BookOpen} />
           <h2 className="text-2xl font-semibold">My Enrolled Courses</h2>
         </div>
 
