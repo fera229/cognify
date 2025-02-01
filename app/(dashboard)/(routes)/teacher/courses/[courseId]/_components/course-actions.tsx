@@ -59,7 +59,7 @@ export function CourseActions({
       );
 
       if (!response.ok) {
-        const error = await response.json();
+        const error: any = await response.json();
         throw new Error(error.message);
       }
       {
@@ -104,7 +104,7 @@ export function CourseActions({
       >
         {isLoading ? 'Loading...' : isPublished ? 'Unpublish' : 'Publish'}
       </Button>
-      <ConfirmModal onConfirm={onDelete} {...confirmModalConfig}>
+      <ConfirmModal onConfirmAction={onDelete} {...confirmModalConfig}>
         <Button size="sm" disabled={isLoading} variant="destructive">
           <Trash className="h-4 w-4" />
         </Button>

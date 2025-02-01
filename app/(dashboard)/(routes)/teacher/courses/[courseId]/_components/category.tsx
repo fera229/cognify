@@ -116,7 +116,7 @@ function CategoryForm({
                       value: category.value,
                     }))}
                     value={field.value}
-                    onChange={field.onChange}
+                    onChangeAction={field.onChange}
                   />
                   <FormMessage />
                 </FormItem>

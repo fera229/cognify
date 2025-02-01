@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { deleteAttachment, getCourseById } from '@/database/courses';
 import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';
 import { error } from 'console';

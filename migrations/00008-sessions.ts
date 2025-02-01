@@ -1,4 +1,4 @@
-import { Sql } from 'postgres';
+import type { Sql } from 'postgres';
 
 export async function up(sql: Sql) {
   await sql`
@@ -15,3 +15,5 @@ export async function up(sql: Sql) {
 export async function down(sql: Sql) {
   await sql`DROP TABLE sessions`;
 }
+
+

@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import { registerSchema } from '@/util/validation';
 import { cookies } from 'next/headers';
 import crypto from 'node:crypto';
+import type { Sql } from 'postgres';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
     // 3. Get database connection
 
     // 4. Check if user exists
-    const [existingUser] = await sql`
+    const [existingUser] = await sql<{ id: number }[]>`
       SELECT
         id
       FROM
@@ -51,7 +52,9 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(validatedData.data.password, 12);
 
     // 6. Create user
-    const [newUser] = await sql`
+    const [newUser] = await sql<
+      { id: number; name: string; email: string; role: string }[]
+    >`
       INSERT INTO
         users (
           name,
@@ -80,7 +83,7 @@ export async function POST(request: NextRequest) {
     // 7. Create session
     const token = crypto.randomBytes(100).toString('base64');
 
-    const [session] = await sql`
+    const [session] = await sql<{ token: string }[]>`
       INSERT INTO
         sessions (token, user_id)
       VALUES

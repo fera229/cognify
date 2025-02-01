@@ -1,5 +1,4 @@
-// database/transcripts.ts
-
+import 'server-only';
 import { sql } from './connect';
 import type { TranscriptSegment } from '@/util/types';
 

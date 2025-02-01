@@ -1,5 +1,6 @@
+import 'server-only';
 import { cache } from 'react';
-import { Session } from '@/util/types';
+import type { Session } from '@/util/types';
 import { sql } from './connect';
 
 export const getValidSession = cache(async (sessionToken: string) => {

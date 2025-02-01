@@ -1,19 +1,21 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { getCourseById } from '@/database/courses';
-import { getUserFromSession } from '@/database/users';
 import { getModuleById } from '@/database/modules';
+import { getUserFromSession } from '@/database/users';
+import { getCourseById } from '@/database/courses';
 import ModuleContent from './_components/module-content';
-interface ModulePageProps {
-  params: {
+
+interface PageProps {
+  params: Promise<{
     courseId: string;
     moduleId: string;
-  };
+  }>;
 }
 
-async function ModulePageContent({ params }: ModulePageProps) {
+async function ModulePageContent({ params }: PageProps) {
   try {
     const paramsAwaited = await params;
+
     const [user, course, module] = await Promise.all([
       getUserFromSession(),
       getCourseById(paramsAwaited.courseId),
@@ -24,41 +26,37 @@ async function ModulePageContent({ params }: ModulePageProps) {
       return redirect('/login');
     }
 
-    if (!course || !module) {
+    // redirect if the course doesn't exist or the user is not the creator of the course
+    if (!course || user.id !== course?.instructor_id) {
       return redirect('/');
     }
 
-    const isInstructor = course.instructor_id === user.id;
-
-    // Check if module belongs to course
-    if (module.course_id !== Number(paramsAwaited.courseId)) {
-      return redirect(`/courses/${paramsAwaited.courseId}`);
-    }
-
-    // For non-instructors, check if module is accessible
-    if (!isInstructor && !module.is_published && !module.is_free) {
-      return redirect(`/courses/${paramsAwaited.courseId}`);
+    if (!module) {
+      return redirect('/');
     }
 
     return (
       <div className="h-full">
-        <ModuleContent
-          module={module}
-          course={course}
-          user={user}
-          isInstructor={isInstructor}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <ModuleContent
+            module={module}
+            course={course}
+            user={user}
+            isInstructor={course.instructor_id === user.id}
+          />
+        </Suspense>
       </div>
     );
   } catch (error) {
-    console.error('Error in ModulePage:', error);
+    console.error('Error loading module:', error);
     return redirect('/');
   }
 }
 
-export default async function ModulePage(props: ModulePageProps) {
+export default async function ModuleEditPage(props: PageProps) {
   return (
     <Suspense fallback={<div>Loading module...</div>}>
+      {/* @ts-expect-error Async Server Component */}
       <ModulePageContent {...props} />
     </Suspense>
   );

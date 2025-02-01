@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Lesson } from '@/util/types';
+import type { Lesson } from '@/util/types';
 
 interface LessonAccessFormProps {
   initialData: Lesson;

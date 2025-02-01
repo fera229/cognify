@@ -6,7 +6,7 @@ import { getSafeReturnToPath } from '@/util/validation';
 import RegisterForm from './register-form';
 
 interface PageProps {
-  searchParams: { returnTo?: string };
+  searchParams: Promise<{ returnTo?: string }>;
 }
 
 export default async function RegisterPage({ searchParams }: PageProps) {
@@ -19,12 +19,13 @@ export default async function RegisterPage({ searchParams }: PageProps) {
     const validSession =
       sessionToken && (await getValidSession(sessionToken?.value));
 
+    const searchParamsAwaited = await searchParams;
+
     if (validSession) {
-      redirect(getSafeReturnToPath(searchParams?.returnTo) || '/');
+      redirect(getSafeReturnToPath(searchParamsAwaited?.returnTo) || '/');
     }
 
     // Pass the returnTo parameter to the registration form
-    const searchParamsAwaited = await searchParams;
     const safeReturnToPath =
       getSafeReturnToPath(searchParamsAwaited.returnTo) || '/';
 

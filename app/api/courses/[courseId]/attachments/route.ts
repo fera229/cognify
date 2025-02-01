@@ -1,6 +1,6 @@
+export const runtime = 'nodejs';
 import { getCourseById, createAttachment } from '@/database/courses';
 import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';
-import { validateCourseForm } from '@/util/validation';
 import { NextResponse } from 'next/server';
 
 export async function POST(

@@ -19,6 +19,13 @@ interface ModuleContentProps {
   courseId: string;
 }
 
+interface PageProps {
+  params: {
+    courseId: string;
+    moduleId: string;
+  };
+}
+
 // Separate the content into its own component for better revalidation
 async function ModuleContent({
   moduleId,
@@ -177,6 +184,7 @@ const ModuleEditPage = async ({
   return (
     <ClientOnly>
       <Suspense fallback={<div>Loading...</div>}>
+        {/* @ts-expect-error Async Server Component */}
         <ModuleContent
           moduleId={paramsAwaited.moduleId}
           courseId={paramsAwaited.courseId}

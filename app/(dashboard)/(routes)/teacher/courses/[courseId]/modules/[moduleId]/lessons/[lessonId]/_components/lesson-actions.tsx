@@ -118,7 +118,7 @@ export function LessonsActions({
         {isLoading ? 'Loading...' : data.is_published ? 'Unpublish' : 'Publish'}
       </Button>
       <ConfirmModal
-        onConfirm={onDelete}
+        onConfirmAction={onDelete}
         title="Delete lesson"
         description="This will permanently delete this lesson and its content."
       >

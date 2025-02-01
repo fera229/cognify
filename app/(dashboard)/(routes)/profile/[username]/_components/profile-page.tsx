@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { IconBadge } from '@/components/icon-badge';
 import { Edit2, GraduationCap, BookOpen, LayoutDashboard } from 'lucide-react';
 import {
   Form,
@@ -22,7 +23,6 @@ import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { User } from '@/database/users';
 import type { Course, Category, CourseProgress } from '@/util/types';
-import { IconBadge } from '@/components/icon-badge';
 
 interface ProfilePageProps {
   user: User;
@@ -50,8 +50,8 @@ export default function ProfilePage({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: user?.name || '',
-      email: user?.email || '',
+      name: user.name || '',
+      email: user.email || '',
     },
   });
 
@@ -108,7 +108,7 @@ export default function ProfilePage({
               <AvatarImage src={undefined} />{' '}
               {/* Add user image field if needed */}
               <AvatarFallback>
-                {user?.name?.charAt(0)?.toUpperCase()}
+                {user.name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 

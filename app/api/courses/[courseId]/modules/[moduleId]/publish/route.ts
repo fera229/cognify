@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { getCourseById } from '@/database/courses';
 import { publishModule } from '@/database/modules';
 import { checkIfSessionIsValid, getUserFromSession } from '@/database/users';

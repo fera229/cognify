@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { NextResponse } from 'next/server';
 import { hasAccessToCourse } from '@/database/enrollments';
 import { getUserFromSession } from '@/database/users';

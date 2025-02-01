@@ -6,7 +6,7 @@ import { Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ConfirmModal } from '@/components/modals/cofirm-modal';
 import toast from 'react-hot-toast';
-import { Lesson } from '@/util/types';
+import type{ Lesson } from '@/util/types';
 
 interface ModuleActionData {
   courseId: string;
@@ -30,7 +30,7 @@ export function ModuleActions({
   const router = useRouter();
 
   // Check if module has any published lessons
-  const hasPublishedLessons = data.lessons?.some(
+  const hasPublishedLessons = data.lessons.some(
     (lesson) => lesson.is_published,
   );
 
@@ -112,7 +112,7 @@ export function ModuleActions({
         {isLoading ? 'Loading...' : data.is_published ? 'Unpublish' : 'Publish'}
       </Button>
       <ConfirmModal
-        onConfirm={onDelete}
+        onConfirmAction={onDelete}
         title="Delete module"
         description="This will permanently delete this module and all its lessons."
       >

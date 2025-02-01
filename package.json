@@ -9,7 +9,8 @@
     "lint": "next lint",
     "migrate": "ley --require tsx/cjs",
     "start": "next start",
-    "fix-types": "ts-node --transpile-only scripts/fix-type-imports.ts"
+    "fix-types": "ts-node --transpile-only scripts/fix-type-imports.ts",
+    "test": "jest"
   },
   "dependencies": {
     "@ai-sdk/mistral": "^1.0.3",
@@ -52,12 +53,12 @@
     "dotenv-safe": "^9.1.0",
     "ley": "^0.8.1",
     "lucide-react": "^0.446.0",
-    "next": "15.0.4-canary.17",
+    "next": "15.1.1-canary.25",
     "next-cloudinary": "^6.16.0",
     "postgres": "^3.4.5",
-    "react": "19.0.0-rc-e740d4b1-20240919",
+    "react": "18.2.0",
     "react-circular-progressbar": "^2.1.0",
-    "react-dom": "19.0.0-rc-e740d4b1-20240919",
+    "react-dom": "18.2.0",
     "react-hook-form": "^7.53.2",
     "react-hot-toast": "^2.4.1",
     "react-quill": "^2.0.0",
@@ -65,20 +66,29 @@
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "uploadthing": "^7.3.0",
+    "vercel": "^39.2.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
     "@tailwindcss/typography": "^0.5.15",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
     "@ts-safeql/eslint-plugin": "^3.4.7",
     "@types/bcrypt": "^5.0.2",
-    "@types/canvas-confetti": "^1.6.4",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/dotenv-safe": "^8.1.6",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20.17.6",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.0",
+    "@types/webpack": "^5.28.5",
     "eslint": "^9.14.0",
     "eslint-config-upleveled": "^8.12.1",
     "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "libpg-query": "16.2.0",
     "postcss": "^8.4.49",
     "prettier": "^3.3.3",
@@ -87,8 +97,22 @@
     "stylelint": "^16.10.0",
     "stylelint-config-upleveled": "^1.1.5",
     "tailwindcss": "^3.4.14",
+    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   },
-  "packageManager": "pnpm@9.11.0+sha512.0a203ffaed5a3f63242cd064c8fb5892366c103e328079318f78062f24ea8c9d50bc6a47aa3567cabefd824d170e78fa2745ed1f16b132e16436146b7688f19b"
+  "packageManager": "pnpm@9.11.0+sha512.0a203ffaed5a3f63242cd064c8fb5892366c103e328079318f78062f24ea8c9d50bc6a47aa3567cabefd824d170e78fa2745ed1f16b132e16436146b7688f19b",
+  
+    "resolutions": {
+    "@ts-safeql/eslint-plugin": "3.4.1",
+    "libpg-query": "13.2.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "@ts-safeql/eslint-plugin": "3.4.1",
+      "libpg-query": "13.2.5"
+    }
+  
+    }
+  
 }

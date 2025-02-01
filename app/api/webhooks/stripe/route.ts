@@ -1,10 +1,10 @@
+export const runtime = 'nodejs';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { markEnrollmentAsPaid } from '@/database/enrollments';
 
 // Disable body parsing, need raw body for webhook signature verification
-export const runtime = 'edge';
 
 export async function POST(req: Request) {
   const body = await req.text();

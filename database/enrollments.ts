@@ -1,3 +1,4 @@
+import 'server-only';
 import { sql } from '@/database/connect';
 import { cache } from 'react';
 import type { Course } from '@/util/types';

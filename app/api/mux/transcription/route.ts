@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { checkIfSessionIsValid } from '@/database/users';
 import { sql } from '@/database/connect';
-import { MuxData } from '@/util/types';
+import type { MuxData } from '@/util/types';
 import Mux from '@mux/mux-node';
 
 const mux = new Mux({

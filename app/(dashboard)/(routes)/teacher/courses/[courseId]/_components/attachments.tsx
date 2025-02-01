@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import * as z from 'zod';
 import { File, Loader2, PlusCircle, Trash2 } from 'lucide-react';
-import { Attachment, Course } from '@/util/types';
+import type { Attachment, Course } from '@/util/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {

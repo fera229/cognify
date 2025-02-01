@@ -1,3 +1,4 @@
+import 'server-only';
 import { cache } from 'react';
 import { sql } from './connect';
 import type { Lesson, TranscriptSegment } from '@/util/types';

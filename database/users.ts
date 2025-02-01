@@ -1,4 +1,5 @@
 'use server';
+import 'server-only';
 import { cache } from 'react';
 import { sql } from './connect';
 import { cookies } from 'next/headers';

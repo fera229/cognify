@@ -1,3 +1,5 @@
+// app/(courseDisplay)/courses/[courseId]/modules/[moduleId]/lessons/[lessonId]/page.tsx
+
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { getCourseById } from '@/database/courses';
@@ -9,11 +11,11 @@ import AILessonAssistant from './_components/ai-lesson-assistant';
 import { hasAccessToCourse } from '@/database/enrollments';
 
 interface LessonPageProps {
-  params: {
+  params: Promise<{
     courseId: string;
     moduleId: string;
     lessonId: string;
-  };
+  }>;
 }
 
 async function LessonPageContent({ params }: LessonPageProps) {
@@ -28,7 +30,7 @@ async function LessonPageContent({ params }: LessonPageProps) {
     ]);
 
     if (!user) {
-      return redirect('/login');
+      redirect('/login');
     }
 
     if (!course || !module || !lesson) {
@@ -81,6 +83,7 @@ async function LessonPageContent({ params }: LessonPageProps) {
 export default async function LessonPage(props: LessonPageProps) {
   return (
     <Suspense fallback={<div>Loading lesson...</div>}>
+      {/* @ts-expect-error Async Server Component */}
       <LessonPageContent {...props} />
     </Suspense>
   );

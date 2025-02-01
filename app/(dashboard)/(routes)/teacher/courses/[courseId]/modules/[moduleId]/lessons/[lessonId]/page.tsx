@@ -11,22 +11,20 @@ import { LessonAccessForm } from './_components/lesson-access-form';
 import { LessonVideoForm } from './_components/lesson-video-form';
 import DescriptionForm from '../../../../_components/description';
 import TitleForm from '../../../../_components/title';
-import toast from 'react-hot-toast';
 import { LessonsActions } from './_components/lesson-actions';
-// import { ContentActions } from '@/components/content-actions';
-// import { getActionData } from '@/util/actions-data';
+import toast from 'react-hot-toast';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     courseId: string;
     moduleId: string;
     lessonId: string;
-  };
+  }>;
 }
 
 const LessonIdPage = async ({ params }: PageProps) => {
   const paramsAwaited = await params;
-  console.log('paramsAwaited', paramsAwaited);
+
   if (
     !paramsAwaited?.courseId ||
     !paramsAwaited?.moduleId ||
@@ -46,28 +44,14 @@ const LessonIdPage = async ({ params }: PageProps) => {
       return redirect('/');
     }
 
-    // related to another approach where I was trying to build an actions component/api route (that allows the user to publish/unpublish and/or delete) that is mutual for all of courses, modules and lessons, left for later review.
-
-    // const actionData = await getActionData({
-    //   lessonId: paramsAwaited.lessonId,
-    //   moduleId: paramsAwaited.moduleId,
-    //   courseId: paramsAwaited.courseId,
-    //   contentType: 'lesson',
-    // });
-
-    if (!user) {
-      return redirect('/login');
-    }
-
-    if (!lesson || !module) {
+    // Only allow access to course instructors
+    if (course.instructor_id !== user.id) {
       return redirect('/');
     }
 
     const requiredFields = [lesson.title, lesson.description, lesson.video_url];
-
     const totalFields = requiredFields.length;
     const completedFields = requiredFields.filter(Boolean).length;
-
     const completionText = `(${completedFields}/${totalFields})`;
     const isComplete = requiredFields.every(Boolean);
 
@@ -94,27 +78,10 @@ const LessonIdPage = async ({ params }: PageProps) => {
                   <h1 className="text-2xl font-medium">Lesson Setup</h1>
                   <span className="text-sm text-slate-700">
                     {isComplete
-                      ? `All frields completed! ${completionText}`
+                      ? `All fields completed! ${completionText}`
                       : `Complete all fields ${completionText}`}
                   </span>
                 </div>
-                {/* see comment above */}
-                {/* <ContentActions disabled={false} actionData={actionData} /> */}
-                {/* <ContentActions
-                  data={{
-                    id: lesson.id.toString(),
-                    courseId: paramsAwaited.courseId,
-                    type: 'lesson',
-                    moduleId: paramsAwaited.moduleId,
-                    is_published: lesson.is_published,
-                    requirementsMet: true,
-                  }}
-                  disabled={false}
-                  isComplete={isComplete}
-                /> */}
-
-                {/*new seperate actions/route handlers solution ⬇️ */}
-
                 <LessonsActions
                   data={{
                     courseId: paramsAwaited.courseId,
@@ -138,23 +105,23 @@ const LessonIdPage = async ({ params }: PageProps) => {
                 <div className="mt-4">
                   <TitleForm
                     initialData={{
-                      ...course,
-                      title: lesson.title || '',
+                      title: lesson.title,
                     }}
                     courseId={Number(course.id)}
                     entityId={Number(lesson.id)}
                     entityType="lesson"
+                    moduleId={Number(module.id)}
                   />
                 </div>
                 <div>
                   <DescriptionForm
                     initialData={{
-                      ...course,
                       description: lesson.description || '',
                     }}
                     courseId={Number(course.id)}
                     entityId={Number(lesson.id)}
                     entityType="lesson"
+                    moduleId={Number(module.id)}
                   />
                 </div>
                 <LessonAccessForm

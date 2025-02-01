@@ -13,9 +13,9 @@ import {
 } from '@/components/ui/accordion';
 
 interface CoursePageProps {
-  params: {
+  params: Promise<{
     courseId: string;
-  };
+  }>;
 }
 
 export default async function CoursePage({ params }: CoursePageProps) {
@@ -46,7 +46,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
     );
 
     return (
-      <div className="min-h-screen overflow-y-auto bg-slate-50">
+      <div className="min-h-screen overflow-y-auto bg-blue-950">
         <div className="max-w-5xl mx-auto p-6 space-y-8 mb-32">
           {/* Course Header */}
           <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">

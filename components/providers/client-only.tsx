@@ -16,8 +16,8 @@ export function ClientOnly({
   }, []);
 
   if (!isMounted) {
-    return fallback;
+    return <>{fallback}</>;
   }
 
-  return children;
+  return <>{children}</>;
 }
