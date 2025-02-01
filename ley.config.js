@@ -1,4 +1,5 @@
-import { config } from "dotenv-safe";
+import { postgresConfig, setEnvironmentVariables } from './util/config';
 
+setEnvironmentVariables();
 
-config();
+export default postgresConfig;

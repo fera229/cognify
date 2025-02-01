@@ -38,7 +38,7 @@ async function LessonPageContent({ params }: LessonPageProps) {
     }
 
     const isInstructor = course.instructor_id === user.id;
-
+    console.log('isInstructor', isInstructor);
     // Check course access if not instructor
     let hasAccess = isInstructor;
     if (!isInstructor) {
